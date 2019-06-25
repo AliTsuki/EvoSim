@@ -169,19 +169,24 @@ MonoBehaviour:
   maxPlantCount: 10
   backgroundFrequency: 0.02800000086426735
   backgroundLacunarity: 1.690000057220459
-  backgroundOctaveCount: 4
+  backgroundOctaveCount: 5
   backgroundPersistence: 0.7900000214576721
   backgroundSeed: 0
-  foregroundFrequency: 0.10199999809265137
-  foregroundLacunarity: 0.7300000190734863
-  foregroundOctaveCount: 4
-  foregroundPersistence: 0.5600000023841858
+  foregroundFrequency: 0.125
+  foregroundLacunarity: 0.03999999910593033
+  foregroundOctaveCount: 5
+  foregroundPersistence: 0.8999999761581421
   foregroundSeed: 1
-  stoneCutoff: 0
-  dirtCutoff: 0.12
-  sandCutoff: -0.25
+  mountainCutoff: 0.91
+  stoneCutoff: 0.02
+  waterCutoff: -0.4
+  dirtCutoff: 0.03
+  sandCutoff: -0.29
+  mountainTile: {fileID: 11400000, guid: 87edf0c115030d34ebf5916650a93acf, type: 2}
   stoneTile: {fileID: 11400000, guid: d19cb9e76235b6645909841e789bd9c6, type: 2}
   waterTile: {fileID: 11400000, guid: 9eb05b7ba47620d4ea04bb707efe137d, type: 2}
+  oceanTile: {fileID: 11400000, guid: c85c66a2402cc2d439de75589719c3ee, type: 2}
+  mountainDirtTile: {fileID: 11400000, guid: 017399a0086c0254fbde1497e385a753, type: 2}
   dirtTile: {fileID: 11400000, guid: 0e4086b6cb91f6546bf41cbc7f7886de, type: 2}
   sandTile: {fileID: 11400000, guid: 444d84ab4520d204d8cd3717134af82b, type: 2}
   tilemaps:

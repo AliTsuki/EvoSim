@@ -8,49 +8,52 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
     // Editor references
-    [SerializeField]
     public bool updateInEditor;
-    [SerializeField, Range(1, 256)]
+    [Range(1, 256)]
     public int worldSize;
-    [SerializeField, Range(0, 256)]
+    [Range(0, 256)]
     public int maxAnimalCount;
-    [SerializeField, Range(0, 256)]
+    [Range(0, 256)]
     public int maxPlantCount;
-    [SerializeField, Range(0, 1)]
+    [Header("Heightmap Noise")]
+    [Range(0, 1)]
     public double backgroundFrequency;
-    [SerializeField, Range(0, 10)]
+    [Range(0, 10)]
     public double backgroundLacunarity;
-    [SerializeField, Range(1, 8)]
+    [Range(1, 8)]
     public int backgroundOctaveCount;
-    [SerializeField, Range(0, 10)]
+    [Range(0, 10)]
     public double backgroundPersistence;
-    [SerializeField]
     public int backgroundSeed;
-    [SerializeField, Range(0, 1)]
+    [Header("Foreground Noise")]
+    [Range(0, 1)]
     public double foregroundFrequency;
-    [SerializeField, Range(0, 10)]
+    [Range(0, 10)]
     public double foregroundLacunarity;
-    [SerializeField, Range(1, 8)]
+    [Range(1, 8)]
     public int foregroundOctaveCount;
-    [SerializeField, Range(0, 10)]
+    [Range(0, 10)]
     public double foregroundPersistence;
-    [SerializeField]
     public int foregroundSeed;
-    [SerializeField, Range(-2, 2)]
+    [Header("Cutoffs")]
+    [Range(-2, 2)]
+    public float mountainCutoff;
+    [Range(-2, 2)]
     public float stoneCutoff;
-    [SerializeField, Range(-2, 2)]
+    [Range(-2, 2)]
+    public float waterCutoff;
+    [Range(-2, 2)]
     public float dirtCutoff;
-    [SerializeField, Range(-2, 2)]
+    [Range(-2, 2)]
     public float sandCutoff;
-    [SerializeField]
+    [Header("Tiles")]
+    public RandomTile mountainTile;
     public RandomTile stoneTile;
-    [SerializeField]
     public AnimatedTile waterTile;
-    [SerializeField]
+    public AnimatedTile oceanTile;
+    public TerrainTile mountainDirtTile;
     public TerrainTile dirtTile;
-    [SerializeField]
     public TerrainTile sandTile;
-    [SerializeField]
     public Tilemap[] tilemaps;
 
 

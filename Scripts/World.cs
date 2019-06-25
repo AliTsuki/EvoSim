@@ -13,15 +13,21 @@ public static class World
     // Tile dictionary
     public static Dictionary<Vector2Int, WorldTile> Tiles = new Dictionary<Vector2Int, WorldTile>();
 
+    public static float backgroundNoiseAverageValue = 0f;
+    public static float backgroundTileAmount = 0f;
+
     // Tile types
     public enum BackgroundTileTypeEnum
     {
+        Mountain,
         Stone,
-        Water
+        Water,
+        Ocean,
     }
     public enum ForegroundTileTypeEnum
     {
         None,
+        MountainDirt,
         Dirt,
         Sand
     }
@@ -85,36 +91,7 @@ public static class World
 
     }
 
-    // Get background tile type
-    public static BackgroundTileTypeEnum GetBackgroundTileType(double _value)
-    {
-        if(_value > gm.stoneCutoff)
-        {
-            return BackgroundTileTypeEnum.Stone;
-        }
-        else
-        {
-            return BackgroundTileTypeEnum.Water;
-        }
-    }
-
-    // Get foreground tile type
-    public static ForegroundTileTypeEnum GetForegroundTileType(double _value, BackgroundTileTypeEnum _backgroundTileType)
-    {
-        if(_backgroundTileType != BackgroundTileTypeEnum.Water)
-        {
-            if(_value > gm.dirtCutoff)
-            {
-                return ForegroundTileTypeEnum.Dirt;
-            }
-            else if(_value > gm.sandCutoff)
-            {
-                return ForegroundTileTypeEnum.Sand;
-            }
-        }
-        // If background tile is water, no foreground tile allowed
-        return ForegroundTileTypeEnum.None;
-    }
+    
 
     // 
     public static void RandomlyAssignTilesToWorld()
@@ -142,7 +119,11 @@ public static class World
         foreach(KeyValuePair<Vector2Int, WorldTile> tile in Tiles)
         {
             // Background tiles
-            if(tile.Value.backgroundTileType == BackgroundTileTypeEnum.Stone)
+            if(tile.Value.backgroundTileType == BackgroundTileTypeEnum.Mountain)
+            {
+                gm.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.mountainTile);
+            }
+            else if(tile.Value.backgroundTileType == BackgroundTileTypeEnum.Stone)
             {
                 gm.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.stoneTile);
             }
@@ -150,8 +131,16 @@ public static class World
             {
                 gm.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.waterTile);
             }
+            else
+            {
+                gm.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.oceanTile);
+            }
             // Foreground tiles
-            if(tile.Value.foregroundTileType == ForegroundTileTypeEnum.Dirt)
+            if(tile.Value.foregroundTileType == ForegroundTileTypeEnum.MountainDirt)
+            {
+                gm.tilemaps[1].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.mountainDirtTile);
+            }
+            else if(tile.Value.foregroundTileType == ForegroundTileTypeEnum.Dirt)
             {
                 gm.tilemaps[1].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.dirtTile);
             }
@@ -174,5 +163,54 @@ public static class World
         {
             gm.tilemaps[i].ClearAllTiles();
         }
+    }
+
+    // Get background tile type
+    public static BackgroundTileTypeEnum GetBackgroundTileType(double _value)
+    {
+        if(_value > gm.mountainCutoff)
+        {
+            return BackgroundTileTypeEnum.Mountain;
+        }
+        else if(_value > gm.stoneCutoff)
+        {
+            return BackgroundTileTypeEnum.Stone;
+        }
+        else if(_value > gm.waterCutoff)
+        {
+            return BackgroundTileTypeEnum.Water;
+        }
+        else
+        {
+            return BackgroundTileTypeEnum.Ocean;
+        }
+    }
+
+    // Get foreground tile type
+    public static ForegroundTileTypeEnum GetForegroundTileType(double _value, BackgroundTileTypeEnum _backgroundTileType)
+    {
+        if(_backgroundTileType != BackgroundTileTypeEnum.Water && _backgroundTileType != BackgroundTileTypeEnum.Ocean)
+        {
+            if(_backgroundTileType == BackgroundTileTypeEnum.Stone)
+            {
+                if(_value > gm.dirtCutoff)
+                {
+                    return ForegroundTileTypeEnum.Dirt;
+                }
+                else if(_value > gm.sandCutoff)
+                {
+                    return ForegroundTileTypeEnum.Sand;
+                }
+            }
+            else
+            {
+                if(_value > gm.dirtCutoff)
+                {
+                    return ForegroundTileTypeEnum.MountainDirt;
+                }
+            }
+        }
+        // If background tile is water, no foreground tile allowed
+        return ForegroundTileTypeEnum.None;
     }
 }
