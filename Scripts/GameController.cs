@@ -1,46 +1,38 @@
-﻿using System.Collections.Generic;
-
-// Controls the state of the game
+﻿// Controls the state of the game
 public static class GameController
 {
-    // Entity lists
-    public static Dictionary<int, Plant> Plants = new Dictionary<int, Plant>();
-    public static Dictionary<int, Animal> Animals = new Dictionary<int, Animal>();
+    // Version
+    private static readonly string version = "0.0.1d";
+
+    // GameManager reference
+    private static readonly GameManager gm = GameManager.instance;
+
+    // Random number generator
+    public static System.Random random = new System.Random();
 
 
     // Start is called before the first frame update
     public static void Start()
     {
+        CameraController.SetupCamera();
+        InputController.Start();
         World.Start();
-        // Add starting plants and animals
-
+        Lifeforms.Start();
     }
 
     // Update is called once per frame
     public static void Update()
     {
+        InputController.Update();
         World.Update();
-        foreach(KeyValuePair<int, Plant> plant in Plants)
-        {
-            plant.Value.Update();
-        }
-        foreach(KeyValuePair<int, Animal> animal in Animals)
-        {
-            animal.Value.Update();
-        }
+        Lifeforms.Update();
     }
 
     // FixedUpdate is called a fixed number of times a second
     public static void FixedUpdate()
     {
+        InputController.FixedUpdate();
         World.FixedUpdate();
-        foreach(KeyValuePair<int, Plant> plant in Plants)
-        {
-            plant.Value.FixedUpdate();
-        }
-        foreach(KeyValuePair<int, Animal> animal in Animals)
-        {
-            animal.Value.FixedUpdate();
-        }
+        Lifeforms.FixedUpdate();
     }
 }

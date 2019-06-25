@@ -1,60 +1,50 @@
 ﻿using UnityEngine;
-using UnityEngine.Tilemaps;
 
-// Calls GameController
+// Holds editor settings and interfaces with GameController by sending Unity Engine update ticks through
 public class GameManager : MonoBehaviour
 {
     // Singleton
     public static GameManager instance;
 
-    // Editor references
-    public bool updateInEditor;
-    [Range(1, 256)]
-    public int worldSize;
-    [Range(0, 256)]
-    public int maxAnimalCount;
-    [Range(0, 256)]
-    public int maxPlantCount;
-    [Header("Heightmap Noise")]
+    // Camera
+    public GameObject mainCamera;
+
+    // Settings
+    [Range(0, 2)]
+    public float aimSensitivity = 1f;
     [Range(0, 1)]
-    public double backgroundFrequency;
-    [Range(0, 10)]
-    public double backgroundLacunarity;
-    [Range(1, 8)]
-    public int backgroundOctaveCount;
-    [Range(0, 10)]
-    public double backgroundPersistence;
-    public int backgroundSeed;
-    [Header("Foreground Noise")]
+    public float aimSpeed = 0.5f;
     [Range(0, 1)]
-    public double foregroundFrequency;
-    [Range(0, 10)]
-    public double foregroundLacunarity;
-    [Range(1, 8)]
-    public int foregroundOctaveCount;
-    [Range(0, 10)]
-    public double foregroundPersistence;
-    public int foregroundSeed;
-    [Header("Cutoffs")]
-    [Range(-2, 2)]
-    public float mountainCutoff;
-    [Range(-2, 2)]
-    public float stoneCutoff;
-    [Range(-2, 2)]
-    public float waterCutoff;
-    [Range(-2, 2)]
-    public float dirtCutoff;
-    [Range(-2, 2)]
-    public float sandCutoff;
-    [Header("Tiles")]
-    public RandomTile mountainTile;
-    public RandomTile stoneTile;
-    public AnimatedTile waterTile;
-    public AnimatedTile oceanTile;
-    public TerrainTile mountainDirtTile;
-    public TerrainTile dirtTile;
-    public TerrainTile sandTile;
-    public Tilemap[] tilemaps;
+    public float aimDecay = 0.35f;
+    [Range(0, 100)]
+    public float zoomSensitivity = 5f;
+    [Range(0, 1)]
+    public float zoomSpeed = 0.5f;
+    [Range(0, 1)]
+    public float zoomDecay = 0.35f;
+    public BaseSettings baseSettings;
+    public NoiseSettings heightmapNoiseSettings;
+    public NoiseSettings temperatureNoiseSettings;
+    public NoiseSettings humidityNoiseSettings;
+    public NoiseSettings sedimentNoiseSettings;
+    public CutoffSettings cutoffSettings;
+    public TileSettings tileSettings;
+
+    // Foldout settings
+    [HideInInspector]
+    public bool baseSettingsFoldout;
+    [HideInInspector]
+    public bool heightmapNoiseSettingsFoldout;
+    [HideInInspector]
+    public bool temperatureNoiseSettingsFoldout;
+    [HideInInspector]
+    public bool humidityNoiseSettingsFoldout;
+    [HideInInspector]
+    public bool groundcoverNoiseSettingsFoldout;
+    [HideInInspector]
+    public bool cutoffSettingsFoldout;
+    [HideInInspector]
+    public bool tileSettingsFoldout;
 
 
     // Start is called before the first frame update
@@ -74,5 +64,17 @@ public class GameManager : MonoBehaviour
     private void FixedUpdate()
     {
         GameController.FixedUpdate();
+    }
+
+    // Generate a new world
+    public void GenerateNewWorld()
+    {
+        World.GenerateNewWorld();
+    }
+
+    // Randomize seeds
+    public void RandomizeSeeds()
+    {
+        World.RandomizeSeeds();
     }
 }
