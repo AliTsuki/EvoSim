@@ -12,7 +12,8 @@ public class GameManagerEditor : Editor
     public Editor heightmapNoiseSettingsEditor;
     public Editor temperatureNoiseSettingsEditor;
     public Editor humidityNoiseSettingsEditor;
-    public Editor groundcoverNoiseSettingsEditor;
+    public Editor sedimentNoiseSettingsEditor;
+    public Editor stoneNoiseSettingsEditor;
     public Editor cutoffSettingsEditor;
     public Editor tileSettingsEditor;
 
@@ -35,7 +36,8 @@ public class GameManagerEditor : Editor
         this.DrawSettingsEditor(this.gm.heightmapNoiseSettings, this.gm.GenerateNewWorld, ref this.gm.heightmapNoiseSettingsFoldout, ref this.heightmapNoiseSettingsEditor);
         this.DrawSettingsEditor(this.gm.temperatureNoiseSettings, this.gm.GenerateNewWorld, ref this.gm.temperatureNoiseSettingsFoldout, ref this.temperatureNoiseSettingsEditor);
         this.DrawSettingsEditor(this.gm.humidityNoiseSettings, this.gm.GenerateNewWorld, ref this.gm.humidityNoiseSettingsFoldout, ref this.humidityNoiseSettingsEditor);
-        this.DrawSettingsEditor(this.gm.sedimentNoiseSettings, this.gm.GenerateNewWorld, ref this.gm.groundcoverNoiseSettingsFoldout, ref this.groundcoverNoiseSettingsEditor);
+        this.DrawSettingsEditor(this.gm.sedimentNoiseSettings, this.gm.GenerateNewWorld, ref this.gm.sedimentNoiseSettingsFoldout, ref this.sedimentNoiseSettingsEditor);
+        this.DrawSettingsEditor(this.gm.stoneNoiseSettings, this.gm.GenerateNewWorld, ref this.gm.stoneNoiseSettingsFoldout, ref this.stoneNoiseSettingsEditor);
         this.DrawSettingsEditor(this.gm.cutoffSettings, this.gm.GenerateNewWorld, ref this.gm.cutoffSettingsFoldout, ref this.cutoffSettingsEditor);
         this.DrawSettingsEditor(this.gm.tileSettings, this.gm.GenerateNewWorld, ref this.gm.tileSettingsFoldout, ref this.tileSettingsEditor);
     }

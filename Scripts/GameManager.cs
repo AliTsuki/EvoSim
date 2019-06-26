@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     public NoiseSettings temperatureNoiseSettings;
     public NoiseSettings humidityNoiseSettings;
     public NoiseSettings sedimentNoiseSettings;
+    public NoiseSettings stoneNoiseSettings;
     public CutoffSettings cutoffSettings;
     public TileSettings tileSettings;
 
@@ -40,7 +41,9 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public bool humidityNoiseSettingsFoldout;
     [HideInInspector]
-    public bool groundcoverNoiseSettingsFoldout;
+    public bool sedimentNoiseSettingsFoldout;
+    [HideInInspector]
+    public bool stoneNoiseSettingsFoldout;
     [HideInInspector]
     public bool cutoffSettingsFoldout;
     [HideInInspector]

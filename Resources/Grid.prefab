@@ -57,7 +57,7 @@ GameObject:
   - component: {fileID: 4053079210808543227}
   - component: {fileID: 4053079210808543224}
   m_Layer: 0
-  m_Name: Heightmap
+  m_Name: Sediment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -173,7 +173,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9b6673ccb8e5c5f46a3b0fe90dbcdc7a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -213,7 +213,7 @@ GameObject:
   - component: {fileID: 4053079210843878613}
   - component: {fileID: 4053079210843878610}
   m_Layer: 0
-  m_Name: Groundcover
+  m_Name: Water
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -471,7 +471,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9234d8d5f2be9194d8d3fae765f9e6a7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

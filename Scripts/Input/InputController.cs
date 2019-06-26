@@ -31,13 +31,5 @@ public static class InputController
     {
         aim = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         zoom = Input.GetAxis("Mouse ScrollWheel");
-        if(aim.magnitude > 0)
-        {
-            Debug.Log($@"Aim = {aim}");
-        }
-        if(zoom != 0)
-        {
-            Debug.Log($@"Zoom = {zoom}");
-        }
     }
 }

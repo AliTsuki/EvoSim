@@ -1,16 +1,18 @@
 ﻿using UnityEngine;
 using UnityEngine.Tilemaps;
 
-//
+// Tile settings
 [CreateAssetMenu(menuName = "Settings/Tile Settings")]
 public class TileSettings : ScriptableObject
 {
-    public RandomTile mountainTile;
-    public RandomTile stoneTile;
-    public AnimatedTile waterTile;
-    public AnimatedTile oceanTile;
-    public TerrainTile mountainDirtTile;
-    public TerrainTile dirtTile;
-    public TerrainTile sandTile;
+    public Tile stoneTile;
+    public Tile cobbleTile;
+    public Tile gravelTile;
+    public Tile dirtTile;
+    public Tile sandTile;
+    public Tile siltTile;
+    public Tile clayTile;
+    public Tile shallowsTile;
+    public Tile oceanTile;
     public Tilemap[] tilemaps = new Tilemap[2];
 }

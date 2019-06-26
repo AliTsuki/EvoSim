@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-//
+// Base settings
 [CreateAssetMenu(menuName = "Settings/Base Settings")]
 public class BaseSettings : ScriptableObject
 {

@@ -13,8 +13,8 @@ public static class World
 
     // GameObjects
     private static GameObject grid;
-    private static GameObject heightmapTilemap;
     private static GameObject sedimentTilemap;
+    private static GameObject waterTilemap;
 
     // Tile dictionary
     public static Dictionary<Vector2Int, WorldTile> Tiles = new Dictionary<Vector2Int, WorldTile>();
@@ -26,17 +26,20 @@ public static class World
     // Tile types
     public enum HeightmapTileTypeEnum
     {
-        Mountain,
-        Stone,
-        Water,
+        Highland,
+        Lowland,
+        Shallows,
         Ocean,
     }
     public enum SedimentTileTypeEnum
     {
         None,
-        MountainDirt,
+        Cobble,
+        Gravel,
         Dirt,
-        Sand
+        Sand,
+        Silt,
+        Clay
     }
 
     // Noise maps
@@ -72,6 +75,14 @@ public static class World
         Persistence = gm.sedimentNoiseSettings.persistence,
         Seed = gm.sedimentNoiseSettings.seed
     };
+    private static Perlin stonePerlin = new Perlin()
+    {
+        Frequency = gm.stoneNoiseSettings.frequency,
+        Lacunarity = gm.stoneNoiseSettings.lacunarity,
+        OctaveCount = gm.stoneNoiseSettings.octaveCount,
+        Persistence = gm.stoneNoiseSettings.persistence,
+        Seed = gm.stoneNoiseSettings.seed
+    };
 
     // Start is called before the first frame update
     public static void Start()
@@ -96,10 +107,10 @@ public static class World
     public static void InstantiateTilemapGameObject()
     {
         grid = GameObject.Instantiate(Resources.Load<GameObject>("Grid"));
-        heightmapTilemap = grid.transform.GetChild(0).gameObject;
-        sedimentTilemap = grid.transform.GetChild(1).gameObject;
-        gm.tileSettings.tilemaps[0] = heightmapTilemap.GetComponent<Tilemap>();
-        gm.tileSettings.tilemaps[1] = sedimentTilemap.GetComponent<Tilemap>();
+        sedimentTilemap = grid.transform.GetChild(0).gameObject;
+        waterTilemap = grid.transform.GetChild(1).gameObject;
+        gm.tileSettings.tilemaps[0] = sedimentTilemap.GetComponent<Tilemap>();
+        gm.tileSettings.tilemaps[1] = waterTilemap.GetComponent<Tilemap>();
     }
 
     // Generates a new world
@@ -121,6 +132,7 @@ public static class World
         gm.temperatureNoiseSettings.seed = GameController.random.Next();
         gm.humidityNoiseSettings.seed = GameController.random.Next();
         gm.sedimentNoiseSettings.seed = GameController.random.Next();
+        gm.stoneNoiseSettings.seed = GameController.random.Next();
         GenerateNewWorld();
     }
 
@@ -159,6 +171,14 @@ public static class World
             Persistence = gm.sedimentNoiseSettings.persistence,
             Seed = gm.sedimentNoiseSettings.seed
         };
+        stonePerlin = new Perlin()
+        {
+            Frequency = gm.stoneNoiseSettings.frequency,
+            Lacunarity = gm.stoneNoiseSettings.lacunarity,
+            OctaveCount = gm.stoneNoiseSettings.octaveCount,
+            Persistence = gm.stoneNoiseSettings.persistence,
+            Seed = gm.stoneNoiseSettings.seed
+        };
     }
 
     // Creates a dictionary of world tiles
@@ -169,11 +189,13 @@ public static class World
             for(int y = -gm.baseSettings.worldSize; y < gm.baseSettings.worldSize; y++)
             {
                 Vector2Int xy = new Vector2Int(x, y);
-                double backgroundNoiseValue = heightmapPerlin.GetValue(x, y, 0);
-                double foregroundNoiseValue = sedimentPerlin.GetValue(x, y, 0);
-                HeightmapTileTypeEnum backgroundTileType = GetHeightmapTileType(backgroundNoiseValue);
-                SedimentTileTypeEnum foregroundTileType = GetSedimentTileType(foregroundNoiseValue, backgroundTileType);
-                Tiles.Add(xy, new WorldTile(xy, backgroundTileType, foregroundTileType));
+                float heightmapNoiseValue = (float)heightmapPerlin.GetValue(x, y, 0);
+                float temperatureNoiseValue = (float)temperaturePerlin.GetValue(x, y, 0);
+                float humidityNoiseValue = (float)humidityPerlin.GetValue(x, y, 0);
+                float sedimentNoiseValue = (float)sedimentPerlin.GetValue(x, y, 0);
+                float stoneNoiseValue = (float)stonePerlin.GetValue(x, y, 0);
+                WorldTile newWorldTile = GetNewWorldTile(xy, heightmapNoiseValue, temperatureNoiseValue, humidityNoiseValue, sedimentNoiseValue, stoneNoiseValue);
+                Tiles.Add(xy, newWorldTile);
             }
         }
     }
@@ -183,39 +205,58 @@ public static class World
     {
         foreach(KeyValuePair<Vector2Int, WorldTile> tile in Tiles)
         {
-            // Heightmap tiles
-            if(tile.Value.backgroundTileType == HeightmapTileTypeEnum.Mountain)
-            {
-                gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.mountainTile);
-            }
-            else if(tile.Value.backgroundTileType == HeightmapTileTypeEnum.Stone)
-            {
-                gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.stoneTile);
-            }
-            else if(tile.Value.backgroundTileType == HeightmapTileTypeEnum.Water)
-            {
-                gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.waterTile);
-            }
-            else
-            {
-                gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.oceanTile);
-            }
             // Sediment tiles
-            if(tile.Value.foregroundTileType == SedimentTileTypeEnum.MountainDirt)
+            switch(tile.Value.sedimentTileType)
             {
-                gm.tileSettings.tilemaps[1].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.mountainDirtTile);
+                case SedimentTileTypeEnum.Cobble:
+                    {
+                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.cobbleTile);
+                        break;
+                    }
+                case SedimentTileTypeEnum.Gravel:
+                    {
+                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.gravelTile);
+                        break;
+                    }
+                case SedimentTileTypeEnum.Dirt:
+                    {
+                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.dirtTile);
+                        break;
+                    }
+                case SedimentTileTypeEnum.Sand:
+                    {
+                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.sandTile);
+                        break;
+                    }
+                case SedimentTileTypeEnum.Silt:
+                    {
+                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.siltTile);
+                        break;
+                    }
+                case SedimentTileTypeEnum.Clay:
+                    {
+                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.clayTile);
+                        break;
+                    }
+                case SedimentTileTypeEnum.None:
+                    {
+                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.stoneTile);
+                        break;
+                    }
             }
-            else if(tile.Value.foregroundTileType == SedimentTileTypeEnum.Dirt)
+            // Water tiles
+            switch(tile.Value.heightmapTileType)
             {
-                gm.tileSettings.tilemaps[1].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.dirtTile);
-            }
-            else if(tile.Value.foregroundTileType == SedimentTileTypeEnum.Sand)
-            {
-                gm.tileSettings.tilemaps[1].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.sandTile);
-            }
-            else if(tile.Value.foregroundTileType == SedimentTileTypeEnum.None)
-            {
-                gm.tileSettings.tilemaps[1].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), null);
+                case HeightmapTileTypeEnum.Shallows:
+                    {
+                        gm.tileSettings.tilemaps[1].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.shallowsTile);
+                        break;
+                    }
+                case HeightmapTileTypeEnum.Ocean:
+                    {
+                        gm.tileSettings.tilemaps[1].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.oceanTile);
+                        break;
+                    }
             }
         }
     }
@@ -230,52 +271,76 @@ public static class World
         }
     }
 
-    // Get heightmap tile type using noise map output value at position and cutoff settings
-    private static HeightmapTileTypeEnum GetHeightmapTileType(double _value)
+    // Get new world tile from noise values
+    private static WorldTile GetNewWorldTile(Vector2Int _xy, float _heightmapNoiseValue, float _temperatureNoiseValue, float _humidityNoiseValue, float _sedimentNoiseValue, float _stoneNoiseValue)
     {
-        if(_value > gm.cutoffSettings.valleyToMountainCutoff)
-        {
-            return HeightmapTileTypeEnum.Mountain;
-        }
-        else if(_value > gm.cutoffSettings.waterToLandCutoff)
-        {
-            return HeightmapTileTypeEnum.Stone;
-        }
-        else if(_value > gm.cutoffSettings.oceanToShallowsCutoff)
-        {
-            return HeightmapTileTypeEnum.Water;
-        }
-        else
-        {
-            return HeightmapTileTypeEnum.Ocean;
-        }
+        HeightmapTileTypeEnum heightmapTileType = GetHeightmapTileType(_heightmapNoiseValue);
+        SedimentTileTypeEnum sedimentTileType = GetSedimentTileType(_sedimentNoiseValue, _stoneNoiseValue);
+        return new WorldTile(_xy, _heightmapNoiseValue, _temperatureNoiseValue, _humidityNoiseValue, heightmapTileType, sedimentTileType);
     }
 
-    // Get sediment tile type using noise map output value at position and cutoff settings
-    private static SedimentTileTypeEnum GetSedimentTileType(double _value, HeightmapTileTypeEnum _backgroundTileType)
+    // Get heightmap tile type using noise map output value and cutoff settings
+    private static HeightmapTileTypeEnum GetHeightmapTileType(float _heightmapNoiseValue)
     {
-        if(_backgroundTileType != HeightmapTileTypeEnum.Water && _backgroundTileType != HeightmapTileTypeEnum.Ocean)
+        HeightmapTileTypeEnum heightmapTileType;
+        // Highland
+        if(_heightmapNoiseValue >= gm.cutoffSettings.lowlandToHighlandCutoff)
         {
-            if(_backgroundTileType == HeightmapTileTypeEnum.Stone)
+            heightmapTileType = HeightmapTileTypeEnum.Highland;
+        }
+        // Lowland
+        else if(_heightmapNoiseValue >= gm.cutoffSettings.shallowsToLowlandCutoff && _heightmapNoiseValue < gm.cutoffSettings.lowlandToHighlandCutoff)
+        {
+            heightmapTileType = HeightmapTileTypeEnum.Lowland;
+        }
+        // Shallows
+        else if(_heightmapNoiseValue >= gm.cutoffSettings.oceanToShallowsCutoff && _heightmapNoiseValue < gm.cutoffSettings.shallowsToLowlandCutoff)
+        {
+            heightmapTileType = HeightmapTileTypeEnum.Shallows;
+        }
+        // Oceans
+        else
+        {
+            heightmapTileType = HeightmapTileTypeEnum.Ocean;
+        }
+        return heightmapTileType;
+    }
+
+    // Get heightmap tile type using noise map output value and cutoff settings
+    private static SedimentTileTypeEnum GetSedimentTileType(float _sedimentNoiseValue, float _stoneNoiseValue)
+    {
+        SedimentTileTypeEnum sedimentTileType;
+        if(_stoneNoiseValue < gm.cutoffSettings.stoneCutoff)
+        {
+            if(_sedimentNoiseValue >= gm.cutoffSettings.cobbleCutoff)
             {
-                if(_value > gm.cutoffSettings.dirtCutoff)
-                {
-                    return SedimentTileTypeEnum.Dirt;
-                }
-                else if(_value > gm.cutoffSettings.sandCutoff)
-                {
-                    return SedimentTileTypeEnum.Sand;
-                }
+                sedimentTileType = SedimentTileTypeEnum.Cobble;
+            }
+            else if(_sedimentNoiseValue >= gm.cutoffSettings.gravelCutoff && _sedimentNoiseValue < gm.cutoffSettings.cobbleCutoff)
+            {
+                sedimentTileType = SedimentTileTypeEnum.Gravel;
+            }
+            else if(_sedimentNoiseValue >= gm.cutoffSettings.dirtCutoff && _sedimentNoiseValue < gm.cutoffSettings.gravelCutoff)
+            {
+                sedimentTileType = SedimentTileTypeEnum.Dirt;
+            }
+            else if(_sedimentNoiseValue >= gm.cutoffSettings.sandCutoff && _sedimentNoiseValue < gm.cutoffSettings.dirtCutoff)
+            {
+                sedimentTileType = SedimentTileTypeEnum.Sand;
+            }
+            else if(_sedimentNoiseValue >= gm.cutoffSettings.siltCutoff && _sedimentNoiseValue < gm.cutoffSettings.sandCutoff)
+            {
+                sedimentTileType = SedimentTileTypeEnum.Silt;
             }
             else
             {
-                if(_value > gm.cutoffSettings.dirtCutoff)
-                {
-                    return SedimentTileTypeEnum.MountainDirt;
-                }
+                sedimentTileType = SedimentTileTypeEnum.Clay;
             }
         }
-        // If heightmap tile is water or ocean, no sediment tile allowed
-        return SedimentTileTypeEnum.None;
+        else
+        {
+            sedimentTileType = SedimentTileTypeEnum.None;
+        }
+        return sedimentTileType;
     }
 }

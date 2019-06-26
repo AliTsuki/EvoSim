@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-//
+// Noise settings
 [CreateAssetMenu(menuName = "Settings/Noise Settings")]
 public class NoiseSettings : ScriptableObject
 {

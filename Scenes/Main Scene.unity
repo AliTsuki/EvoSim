@@ -179,13 +179,15 @@ MonoBehaviour:
     type: 2}
   sedimentNoiseSettings: {fileID: 11400000, guid: 82e37b06f50edab499f815406f353588,
     type: 2}
+  stoneNoiseSettings: {fileID: 11400000, guid: 2c84295300f83664ea8297e12d2964e4, type: 2}
   cutoffSettings: {fileID: 11400000, guid: 92b8089f65d7e5040a95ae21fdb140f5, type: 2}
   tileSettings: {fileID: 11400000, guid: 47ba91ca59746fa419efaca59b807f75, type: 2}
   baseSettingsFoldout: 1
   heightmapNoiseSettingsFoldout: 1
   temperatureNoiseSettingsFoldout: 1
   humidityNoiseSettingsFoldout: 1
-  groundcoverNoiseSettingsFoldout: 1
+  sedimentNoiseSettingsFoldout: 1
+  stoneNoiseSettingsFoldout: 1
   cutoffSettingsFoldout: 1
   tileSettingsFoldout: 1
 --- !u!1 &1562389449
