@@ -3,7 +3,6 @@
 using SharpNoise.Modules;
 
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 // Creates the world environment and assigns tiles to tilemaps
 public static class World
@@ -12,9 +11,12 @@ public static class World
     private static readonly GameManager gm = GameManager.instance;
 
     // GameObjects
-    private static GameObject grid;
-    private static GameObject sedimentTilemap;
-    private static GameObject waterTilemap;
+    private static GameObject terrainObject;
+    private static MeshRenderer terrainMeshRenderer;
+    private static MeshFilter terrainMeshFilter;
+    private static GameObject waterObject;
+    private static MeshRenderer waterMeshRenderer;
+    private static MeshFilter waterMeshFilter;
 
     // Tile dictionary
     public static Dictionary<Vector2Int, WorldTile> Tiles = new Dictionary<Vector2Int, WorldTile>();
@@ -87,7 +89,7 @@ public static class World
     // Start is called before the first frame update
     public static void Start()
     {
-        InstantiateTilemapGameObject();
+        InstantiateWorldGameObjects();
         GenerateNewWorld();
     }
 
@@ -104,22 +106,29 @@ public static class World
     }
 
     // Instantiates the grid and tilemaps
-    public static void InstantiateTilemapGameObject()
+    public static void InstantiateWorldGameObjects()
     {
-        grid = GameObject.Instantiate(Resources.Load<GameObject>("Grid"));
-        sedimentTilemap = grid.transform.GetChild(0).gameObject;
-        waterTilemap = grid.transform.GetChild(1).gameObject;
-        gm.tileSettings.tilemaps[0] = sedimentTilemap.GetComponent<Tilemap>();
-        gm.tileSettings.tilemaps[1] = waterTilemap.GetComponent<Tilemap>();
+        TextureAtlas.CreateAtlas();
+        terrainObject = new GameObject(name: "Terrain", typeof(MeshFilter), typeof(MeshRenderer));
+        terrainMeshFilter = terrainObject.GetComponent<MeshFilter>();
+        terrainMeshRenderer = terrainObject.GetComponent<MeshRenderer>();
+        terrainMeshRenderer.material = new Material(Shader.Find("Shader Graphs/Terrain Shader"));
+        terrainMeshRenderer.material.SetTexture("_Texture2D", TextureAtlas.Atlas);
+        waterObject = new GameObject(name: "Water", typeof(MeshFilter), typeof(MeshRenderer));
+        waterMeshFilter = waterObject.GetComponent<MeshFilter>();
+        waterMeshRenderer = waterObject.GetComponent<MeshRenderer>();
+        waterObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Shader Graphs/Water Shader"));
+        waterObject.GetComponent<MeshRenderer>().material.SetTexture("_Texture2d", new Texture2D(2, 2)); // TODO: Set up animated water renderer
+        waterObject.transform.position = new Vector3(0, 1, 0);
     }
 
     // Generates a new world
     public static void GenerateNewWorld()
     {
-        ClearTilesAndTilemap();
+        ClearTiles();
         UpdateNoiseSettings();
         CreateTiles();
-        AssignTilesToTilemap();
+        AssignTilesToMesh();
         Lifeforms.ResetAllLife();
         Lifeforms.SpawnLifeforms();
         Debug.Log($@"New World Generated!");
@@ -201,74 +210,16 @@ public static class World
     }
 
     // Assigns tiles to tilemaps using tile dictionary
-    private static void AssignTilesToTilemap()
+    private static void AssignTilesToMesh()
     {
-        foreach(KeyValuePair<Vector2Int, WorldTile> tile in Tiles)
-        {
-            // Sediment tiles
-            switch(tile.Value.sedimentTileType)
-            {
-                case SedimentTileTypeEnum.Cobble:
-                    {
-                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.cobbleTile);
-                        break;
-                    }
-                case SedimentTileTypeEnum.Gravel:
-                    {
-                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.gravelTile);
-                        break;
-                    }
-                case SedimentTileTypeEnum.Dirt:
-                    {
-                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.dirtTile);
-                        break;
-                    }
-                case SedimentTileTypeEnum.Sand:
-                    {
-                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.sandTile);
-                        break;
-                    }
-                case SedimentTileTypeEnum.Silt:
-                    {
-                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.siltTile);
-                        break;
-                    }
-                case SedimentTileTypeEnum.Clay:
-                    {
-                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.clayTile);
-                        break;
-                    }
-                case SedimentTileTypeEnum.None:
-                    {
-                        gm.tileSettings.tilemaps[0].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.stoneTile);
-                        break;
-                    }
-            }
-            // Water tiles
-            switch(tile.Value.heightmapTileType)
-            {
-                case HeightmapTileTypeEnum.Shallows:
-                    {
-                        gm.tileSettings.tilemaps[1].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.shallowsTile);
-                        break;
-                    }
-                case HeightmapTileTypeEnum.Ocean:
-                    {
-                        gm.tileSettings.tilemaps[1].SetTile(new Vector3Int(tile.Key.x, tile.Key.y, 0), gm.tileSettings.oceanTile);
-                        break;
-                    }
-            }
-        }
+        terrainObject.GetComponent<MeshFilter>().mesh = MeshBuilder.CreateMesh(Tiles, MeshBuilder.MeshTypeEnum.Terrain);
+        waterObject.GetComponent<MeshFilter>().mesh = MeshBuilder.CreateMesh(Tiles, MeshBuilder.MeshTypeEnum.Water);
     }
 
     // Clears the tile dictionary and all tilemaps
-    private static void ClearTilesAndTilemap()
+    private static void ClearTiles()
     {
         Tiles.Clear();
-        for(int i = 0; i < gm.tileSettings.tilemaps.Length; i++)
-        {
-            gm.tileSettings.tilemaps[i].ClearAllTiles();
-        }
     }
 
     // Get new world tile from noise values

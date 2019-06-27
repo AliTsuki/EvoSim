@@ -11,8 +11,8 @@ public static class CameraController
     public static Camera camera;
     
     // Camera default position, rotation, and zoom levels
-    public static readonly Vector3 cameraDefaultPosition = new Vector3(0, 0, -10);
-    public static readonly Quaternion cameraDefaultRotation = Quaternion.Euler(0, 0, 0);
+    public static readonly Vector3 cameraDefaultPosition = new Vector3(0, 10, 0);
+    public static readonly Quaternion cameraDefaultRotation = Quaternion.Euler(90, 0, 0);
     public static readonly float cameraDefaultZoomLevel = 40f;
 
     // Zoom stuff
@@ -38,7 +38,7 @@ public static class CameraController
         aimTotal += _aim;
         if(aimTotal.magnitude > 0)
         {
-            Vector3 newPosition = Vector3.Lerp(cameraObject.transform.position, cameraObject.transform.position + (new Vector3(aimTotal.x, aimTotal.y, 0) * (camera.orthographicSize / 10) * gm.aimSensitivity), gm.aimSpeed);
+            Vector3 newPosition = Vector3.Lerp(cameraObject.transform.position, cameraObject.transform.position + (new Vector3(aimTotal.x, 0, aimTotal.y) * (camera.orthographicSize / 10) * gm.aimSensitivity), gm.aimSpeed);
             cameraObject.transform.position = newPosition;
             aimTotal = Vector2.Lerp(aimTotal, new Vector2(0, 0), gm.aimDecay);
         }
