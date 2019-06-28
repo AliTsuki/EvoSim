@@ -7,12 +7,6 @@ public static class MeshBuilder
     // GameManager reference
     private static readonly GameManager gm = GameManager.instance;
 
-    // Mesh data
-    public static Mesh mesh;
-    public static Vector3[] verts;
-    public static Vector2[] uvs;
-    public static int[] tris;
-
     public enum MeshTypeEnum
     {
         Terrain,
@@ -25,58 +19,103 @@ public static class MeshBuilder
         // Set limits
         int worldSize = gm.baseSettings.worldSize;
         int numRows = worldSize * 2;
-        int numTriIndicesPerRow = worldSize * 2 * 2 * 3;
-        int numVertsPerRow = numTriIndicesPerRow + 2;
-        int numTriIndicesTotal = numRows * numTriIndicesPerRow * 3;
-        int numVertsTotal = numRows * numVertsPerRow;
+        int numQuadsPerRow = numRows;
+        const int numVertsPerQuad = 4;
+        const int numTriIndicesPerQuad = 6;
+        int numVertsTotal = numRows * numVertsPerQuad * numQuadsPerRow;
+        int numTriIndicesTotal = numVertsTotal * 3 / 2;
         // Assign limits to arrays
-        mesh = new Mesh();
-        verts = new Vector3[numVertsTotal];
-        uvs = new Vector2[numVertsTotal];
-        tris = new int[numTriIndicesTotal];
-        // Assign vertices and triangles
+        Mesh mesh = new Mesh();
+        Vector3[] verts = new Vector3[numVertsTotal];
+        Vector2[] uvs = new Vector2[numVertsTotal];
+        int[] tris = new int[numTriIndicesTotal];
+        // Assign all verts, uvs, and tris to arrays
         // Loop through rows
         for(int rowIndex = 0; rowIndex < numRows; rowIndex++)
         {
-            // Assing starting x and z values
-            int x = -worldSize;
-            int y = 0;
-            int z = -worldSize + rowIndex;
-            // Assign vertices
-            for(int vertIndex = rowIndex * numVertsPerRow; vertIndex < (rowIndex + 1) * numVertsPerRow; vertIndex++)
+            // Verts
+            // Assign starting x and z values for vertices
+            int vx = -worldSize;
+            int vy = 0;
+            int vz = -worldSize + rowIndex;
+            // Loop through quads in row
+            for(int quadIndex = rowIndex * numQuadsPerRow; quadIndex < (rowIndex + 1) * numQuadsPerRow; quadIndex++)
             {
-                verts[vertIndex] = new Vector3(x, y, z);
-                if(vertIndex % 2 == 0)
+                // Assign vertices
+                int vertIndex = quadIndex * numVertsPerQuad;
+                verts[vertIndex] = new Vector3(vx, vy, vz);
+                vertIndex++;
+                vx += 0;
+                vz += 1;
+                verts[vertIndex] = new Vector3(vx, vy, vz);
+                vertIndex++;
+                vx += 1;
+                vz -= 1;
+                verts[vertIndex] = new Vector3(vx, vy, vz);
+                vertIndex++;
+                vx += 0;
+                vz += 1;
+                verts[vertIndex] = new Vector3(vx, vy, vz);
+                vz -= 1;
+            }
+            // UVs
+            // Loop through quads in row
+            for(int quadIndex = rowIndex * numQuadsPerRow; quadIndex < (rowIndex + 1) * numQuadsPerRow; quadIndex++)
+            {
+                // Assign UVs
+                int uvIndex = quadIndex * numVertsPerQuad;
                 {
-                    x += 0;
-                    z += 1;
-                }
-                else
-                {
-                    x += 1;
-                    z -= 1;
+                    Vector2Int tilePos = World.GetTilePosFromQuadIndex(quadIndex);
+                    string name;
+                    if(_type == MeshTypeEnum.Terrain)
+                    {
+                        name = _tiles[tilePos].sedimentTileType.ToString();
+                    }
+                    else
+                    {
+                        name = _tiles[tilePos].heightmapTileType.ToString();
+                        if(name != World.HeightmapTileTypeEnum.Shallows.ToString() && name != World.HeightmapTileTypeEnum.Ocean.ToString())
+                        {
+                            name = "Blank";
+                        }
+                    }
+                    Vector2[] map = UVMap.GetUVMap(name).UVMaps;
+                    uvs[uvIndex] = map[0];
+                    uvIndex++;
+                    uvs[uvIndex] = map[1];
+                    uvIndex++;
+                    uvs[uvIndex] = map[2];
+                    uvIndex++;
+                    uvs[uvIndex] = map[3];
                 }
             }
-            // Assign starting x, y, and z values
-            int vertIndexStartForTris = rowIndex * numVertsPerRow;
-            x = vertIndexStartForTris;
-            y = vertIndexStartForTris + 1;
-            z = vertIndexStartForTris + 2;
-            // Assign triangles
-            for(int triIndex = rowIndex * numTriIndicesPerRow; triIndex < (rowIndex + 1) * numTriIndicesPerRow; triIndex += 3)
+            // Tris
+            // Assign starting x, y, and z values for triangles
+            int vertIndexStartForTris = rowIndex * numVertsPerQuad * numQuadsPerRow;
+            int tx = vertIndexStartForTris;
+            int ty = vertIndexStartForTris + 1;
+            int tz = vertIndexStartForTris + 2;
+            // Loop through quads in row
+            for(int quadIndex = rowIndex * numQuadsPerRow; quadIndex < (rowIndex + 1) * numQuadsPerRow; quadIndex++)
             {
-                tris[triIndex]     = x;
-                tris[triIndex + 1] = y;
-                tris[triIndex + 2] = z;
-                x++;
-                if(triIndex % 2 == 0)
-                {
-                    y += 2;
-                }
-                else
-                {
-                    z += 2;
-                }
+                // Assign triangles
+                int triIndex = quadIndex * numTriIndicesPerQuad;
+                tris[triIndex] = tx;
+                triIndex++;
+                tris[triIndex] = ty;
+                triIndex++;
+                tris[triIndex] = tz;
+                triIndex++;
+                tx++;
+                ty += 2;
+                tris[triIndex] = tx;
+                triIndex++;
+                tris[triIndex] = ty;
+                triIndex++;
+                tris[triIndex] = tz;
+                tx += 3;
+                ty += 2;
+                tz += 4;
             }
         }
         // Assign mesh data to mesh

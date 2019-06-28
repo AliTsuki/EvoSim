@@ -4,20 +4,16 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 
 // Create texture atlas and set up UVs for textures
-public static class TextureAtlas
+public class TextureAtlas
 {
-    // Regular expressions
-    // TODO: Fix this fucking regex shit OMG UUUUGGHGHGHGHG
-    public static Regex regex = new Regex(@"/[ \w-]+?(?=\.)/");
-
     // Atlas getter
-    public static Texture2D Atlas { get; private set; }
+    public Texture2D Atlas { get; private set; }
 
     // Creates Texture Atlas from all terrain textures
-    public static void CreateAtlas()
+    public void CreateAtlas(string _path)
     {
         // Get all terrain texture names
-        string[] imageNames = Directory.GetFiles("Assets/Textures/Terrain Textures/", "*.png");
+        string[] imageNames = Directory.GetFiles($@"Assets/Textures/{_path}/", "*.png");
         // Default tile pixel size
         int tilePixelWidth = 32;
         int tilePixelHeight = 32;
@@ -27,37 +23,45 @@ public static class TextureAtlas
         Texture2D tempAtlas = new Texture2D(atlasWidth, atlasHeight);
         // Initialize image count
         int count = 0;
-        if(count <= imageNames.Length - 1)
+        // Loop through image slots for textures in atlas
+        for(int x = 0; x < atlasWidth / tilePixelWidth; x++)
         {
-            for(int x = 0; x < atlasWidth / tilePixelWidth; x++)
+            for(int y = 0; y < atlasHeight / tilePixelHeight; y++)
             {
-                for(int y = 0; y < atlasHeight / tilePixelHeight; y++)
+                // If completed all images go to end
+                if(count > imageNames.Length - 1)
                 {
-                    Texture2D tempTexture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
-                    tempTexture.LoadImage(File.ReadAllBytes(imageNames[count]));
-                    tempAtlas.SetPixels(x * tilePixelWidth, y * tilePixelHeight, tilePixelWidth, tilePixelHeight, tempTexture.GetPixels());
-                    float startx = x * tilePixelWidth;
-                    float starty = y * tilePixelHeight;
-                    float perPixelRatiox = 1.0f / tempAtlas.width;
-                    float perPixelRatioy = 1.0f / tempAtlas.height;
-                    startx *= perPixelRatiox;
-                    starty *= perPixelRatioy;
-                    float endx = startx + (perPixelRatiox * tilePixelWidth);
-                    float endy = starty + (perPixelRatioy * tilePixelHeight);
-                    Match imageName = regex.Match(imageNames[count]);
-                    Debug.Log($@"Before REGEX: {imageNames[count]}, After REGEX: {imageName.Value}");
-                    UVMap map = new UVMap(imageName.Value, new Vector2[]
-                    {
-                        new Vector2(startx, starty),
-                        new Vector2(startx, endy),
-                        new Vector2(endx, starty),
-                        new Vector2(endx, endy)
-                    });
-                    count++;
+                    goto end;
                 }
+                // Load image into temporary texture
+                Texture2D tempTexture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
+                tempTexture.LoadImage(File.ReadAllBytes(imageNames[count]));
+                // Write image to temporary atlas
+                tempAtlas.SetPixels(x * tilePixelWidth, y * tilePixelHeight, tilePixelWidth, tilePixelHeight, tempTexture.GetPixels());
+                // Get UV coords for image in atlas
+                float startx = x * tilePixelWidth;
+                float starty = y * tilePixelHeight;
+                float perPixelRatiox = 1.0f / tempAtlas.width;
+                float perPixelRatioy = 1.0f / tempAtlas.height;
+                startx *= perPixelRatiox;
+                starty *= perPixelRatioy;
+                float endx = startx + (perPixelRatiox * tilePixelWidth);
+                float endy = starty + (perPixelRatioy * tilePixelHeight);
+                // Get image name for UV map
+                Match imageName = Regex.Match(imageNames[count], @"([ \w-]+?)(?=\.)");
+                // Create a new UV map with coords for named texture on atlas
+                UVMap map = new UVMap(imageName.Value, new Vector2[]
+                {
+                    new Vector2(startx, starty),
+                    new Vector2(startx, endy),
+                    new Vector2(endx, starty),
+                    new Vector2(endx, endy)
+                });
+                count++;
             }
         }
-        Atlas = tempAtlas;
-        File.WriteAllBytes("Assets/Textures/Atlas/atlas.png", tempAtlas.EncodeToPNG());
+        end:;
+        this.Atlas = tempAtlas;
+        File.WriteAllBytes($@"Assets/Textures/Atlas/{_path} Atlas.png", tempAtlas.EncodeToPNG());
     }
 }

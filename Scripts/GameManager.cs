@@ -6,22 +6,7 @@ public class GameManager : MonoBehaviour
     // Singleton
     public static GameManager instance;
 
-    // Camera
-    public GameObject mainCamera;
-
     // Settings
-    [Range(0, 2)]
-    public float aimSensitivity = 1f;
-    [Range(0, 1)]
-    public float aimSpeed = 0.5f;
-    [Range(0, 1)]
-    public float aimDecay = 0.35f;
-    [Range(0, 100)]
-    public float zoomSensitivity = 5f;
-    [Range(0, 1)]
-    public float zoomSpeed = 0.5f;
-    [Range(0, 1)]
-    public float zoomDecay = 0.35f;
     public BaseSettings baseSettings;
     public NoiseSettings heightmapNoiseSettings;
     public NoiseSettings temperatureNoiseSettings;

@@ -11,12 +11,15 @@ public static class World
     private static readonly GameManager gm = GameManager.instance;
 
     // GameObjects
+    private static TextureAtlas terrainTextureAtlas;
     private static GameObject terrainObject;
     private static MeshRenderer terrainMeshRenderer;
     private static MeshFilter terrainMeshFilter;
+    private static TextureAtlas waterTextureAtlas;
     private static GameObject waterObject;
     private static MeshRenderer waterMeshRenderer;
     private static MeshFilter waterMeshFilter;
+    
 
     // Tile dictionary
     public static Dictionary<Vector2Int, WorldTile> Tiles = new Dictionary<Vector2Int, WorldTile>();
@@ -35,7 +38,7 @@ public static class World
     }
     public enum SedimentTileTypeEnum
     {
-        None,
+        Stone,
         Cobble,
         Gravel,
         Dirt,
@@ -108,18 +111,31 @@ public static class World
     // Instantiates the grid and tilemaps
     public static void InstantiateWorldGameObjects()
     {
-        TextureAtlas.CreateAtlas();
+        // Terrain setup
+        terrainTextureAtlas = new TextureAtlas();
+        terrainTextureAtlas.CreateAtlas("Terrain");
         terrainObject = new GameObject(name: "Terrain", typeof(MeshFilter), typeof(MeshRenderer));
         terrainMeshFilter = terrainObject.GetComponent<MeshFilter>();
         terrainMeshRenderer = terrainObject.GetComponent<MeshRenderer>();
         terrainMeshRenderer.material = new Material(Shader.Find("Shader Graphs/Terrain Shader"));
-        terrainMeshRenderer.material.SetTexture("_Texture2D", TextureAtlas.Atlas);
+        Texture2D terrainAtlas = new Texture2D(0, 0, TextureFormat.ARGB32, false);
+        terrainAtlas.LoadImage(System.IO.File.ReadAllBytes("Assets/Textures/Atlas/Terrain Atlas.png"));
+        terrainAtlas.filterMode = FilterMode.Point;
+        terrainAtlas.wrapMode = TextureWrapMode.Clamp;
+        terrainMeshRenderer.material.SetTexture("_Texture2D", terrainAtlas);
+        // Water setup
+        waterTextureAtlas = new TextureAtlas();
+        waterTextureAtlas.CreateAtlas("Water");
         waterObject = new GameObject(name: "Water", typeof(MeshFilter), typeof(MeshRenderer));
         waterMeshFilter = waterObject.GetComponent<MeshFilter>();
         waterMeshRenderer = waterObject.GetComponent<MeshRenderer>();
         waterObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Shader Graphs/Water Shader"));
-        waterObject.GetComponent<MeshRenderer>().material.SetTexture("_Texture2d", new Texture2D(2, 2)); // TODO: Set up animated water renderer
-        waterObject.transform.position = new Vector3(0, 1, 0);
+        Texture2D waterAtlas = new Texture2D(0, 0, TextureFormat.ARGB32, false);
+        waterAtlas.LoadImage(System.IO.File.ReadAllBytes("Assets/Textures/Atlas/Water Atlas.png"));
+        waterAtlas.filterMode = FilterMode.Point;
+        waterAtlas.wrapMode = TextureWrapMode.Clamp;
+        waterMeshRenderer.material.SetTexture("_Texture2D", waterAtlas);
+        waterObject.transform.position = new Vector3(0, 0.1f, 0);
     }
 
     // Generates a new world
@@ -290,8 +306,16 @@ public static class World
         }
         else
         {
-            sedimentTileType = SedimentTileTypeEnum.None;
+            sedimentTileType = SedimentTileTypeEnum.Stone;
         }
         return sedimentTileType;
+    }
+
+    // Get tile position from quad index
+    public static Vector2Int GetTilePosFromQuadIndex(int _quadIndex)
+    {
+        int x = -gm.baseSettings.worldSize + (_quadIndex % (gm.baseSettings.worldSize * 2));
+        int y = -gm.baseSettings.worldSize + Mathf.FloorToInt(_quadIndex / (gm.baseSettings.worldSize * 2));
+        return new Vector2Int(x, y);
     }
 }

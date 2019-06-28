@@ -1,62 +1,58 @@
-﻿using UnityEngine;
+﻿using Cinemachine;
+
+using UnityEngine;
 
 // Controls the camera
 public static class CameraController
 {
     // GameManager reference
     private static readonly GameManager gm = GameManager.instance;
+    // Camera Settings reference
+    private static readonly CameraSettings camSettings = CameraSettings.instance;
 
-    // Main camera reference
-    public static GameObject cameraObject;
-    public static Camera camera;
+    // GameObject references
+    private static GameObject pointer;
+    private static CinemachineVirtualCamera camera;
     
     // Camera default position, rotation, and zoom levels
-    public static readonly Vector3 cameraDefaultPosition = new Vector3(0, 10, 0);
-    public static readonly Quaternion cameraDefaultRotation = Quaternion.Euler(90, 0, 0);
-    public static readonly float cameraDefaultZoomLevel = 40f;
+    private static readonly Vector3 pointerDefaultPosition = new Vector3(0, 0, 0);
+    private static readonly float cameraDefaultZoomLevel = 40f;
 
     // Zoom stuff
-    public static Vector2 aimTotal = new Vector2(0, 0);
-    public static float zoomTotal = 0f;
+    private static float zoomTotal = 0f;
 
 
     // Setup camera
     public static void SetupCamera()
     {
-        if(gm.mainCamera == null)
-        {
-            gm.mainCamera = GameObject.Find("Main Camera");
-        }
-        cameraObject = gm.mainCamera;
-        camera = gm.mainCamera.GetComponent<Camera>();
+        pointer = camSettings.pointer;
+        pointer.transform.position = pointerDefaultPosition;
+        camera = camSettings.mainCamera.GetComponent<CinemachineVirtualCamera>();
+        camera.m_Lens.OrthographicSize = cameraDefaultZoomLevel;
     }
 
     // Moves the camera according to inputs
     public static void UpdateCameraPosition(Vector2 _aim, float _zoom)
     {
         // Update aim
-        aimTotal += _aim;
-        if(aimTotal.magnitude > 0)
+        if(_aim.magnitude > 0)
         {
-            Vector3 newPosition = Vector3.Lerp(cameraObject.transform.position, cameraObject.transform.position + (new Vector3(aimTotal.x, 0, aimTotal.y) * (camera.orthographicSize / 10) * gm.aimSensitivity), gm.aimSpeed);
-            cameraObject.transform.position = newPosition;
-            aimTotal = Vector2.Lerp(aimTotal, new Vector2(0, 0), gm.aimDecay);
+            pointer.GetComponent<Rigidbody>().AddRelativeForce(new Vector3(_aim.x, 0, _aim.y) * (camera.m_Lens.OrthographicSize / 10) * camSettings.aimSensitivity);
         }
         // Update zoom
         zoomTotal -= _zoom;
         if(zoomTotal != 0)
         {
-            float newSize = Mathf.Clamp(Mathf.Lerp(camera.orthographicSize, camera.orthographicSize + (zoomTotal * gm.zoomSensitivity), gm.zoomSpeed), 1, 100);
-            camera.orthographicSize = newSize;
-            zoomTotal = Mathf.Lerp(zoomTotal, 0, gm.zoomDecay);
+            float newSize = Mathf.Clamp(Mathf.Lerp(camera.m_Lens.OrthographicSize, camera.m_Lens.OrthographicSize + (zoomTotal * camSettings.zoomSensitivity), camSettings.zoomSpeed), 1, 100);
+            camera.m_Lens.OrthographicSize = newSize;
+            zoomTotal = Mathf.Lerp(zoomTotal, 0, camSettings.zoomDecay);
         }
     }
 
     // Reset camera to default position
     public static void ResetCameraPosition()
     {
-        cameraObject.transform.position = cameraDefaultPosition;
-        cameraObject.transform.rotation = cameraDefaultRotation;
-        camera.orthographicSize = cameraDefaultZoomLevel;
+        pointer.transform.position = pointerDefaultPosition;
+        camera.m_Lens.OrthographicSize = cameraDefaultZoomLevel;
     }
 }
