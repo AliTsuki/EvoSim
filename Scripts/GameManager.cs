@@ -6,6 +6,10 @@ public class GameManager : MonoBehaviour
     // Singleton
     public static GameManager instance;
 
+    // Entity
+    // TODO: replace this, figure out a better way to access prefab
+    public GameObject entity;
+
     // Settings
     public BaseSettings baseSettings;
     public NoiseSettings heightmapNoiseSettings;
@@ -64,5 +68,12 @@ public class GameManager : MonoBehaviour
     public void RandomizeSeeds()
     {
         World.RandomizeSeeds();
+    }
+
+    // Spawn lifeforms
+    public void SpawnLifeforms()
+    {
+        Lifeforms.ResetAllLife();
+        Lifeforms.SpawnLifeforms();
     }
 }

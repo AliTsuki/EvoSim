@@ -2,7 +2,7 @@
 public static class GameController
 {
     // Version
-    private static readonly string version = "0.0.2b";
+    private static readonly string version = "0.0.2c";
 
     // GameManager reference
     private static readonly GameManager gm = GameManager.instance;

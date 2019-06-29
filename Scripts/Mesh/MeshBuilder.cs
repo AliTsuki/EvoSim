@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using UnityEngine;
 
-using UnityEngine;
-
+// Builds meshes
 public static class MeshBuilder
 {
     // GameManager reference
@@ -14,7 +13,7 @@ public static class MeshBuilder
     }
 
     // Creates a mesh
-    public static Mesh CreateMesh(Dictionary<Vector2Int, WorldTile> _tiles, MeshTypeEnum _type)
+    public static Mesh CreateMesh(MeshTypeEnum _type)
     {
         // Set limits
         int worldSize = gm.baseSettings.worldSize;
@@ -69,11 +68,11 @@ public static class MeshBuilder
                     string name;
                     if(_type == MeshTypeEnum.Terrain)
                     {
-                        name = _tiles[tilePos].sedimentTileType.ToString();
+                        name = World.Tiles[tilePos].sedimentTileType.ToString();
                     }
                     else
                     {
-                        name = _tiles[tilePos].heightmapTileType.ToString();
+                        name = World.Tiles[tilePos].heightmapTileType.ToString();
                         if(name != World.HeightmapTileTypeEnum.Shallows.ToString() && name != World.HeightmapTileTypeEnum.Ocean.ToString())
                         {
                             name = "Blank";

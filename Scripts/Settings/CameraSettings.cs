@@ -20,11 +20,14 @@ public class CameraSettings : MonoBehaviour
     [Range(0, 1)]
     public float zoomDecay = 0.35f;
 
-    // Start is called before the first frame update
-    private void Start()
+    // Initialize camera
+    private void Awake()
     {
         instance = this;
         this.mainCamera = this.gameObject;
-        this.pointer = GameObject.Find("Pointer");
+        if(this.pointer == null)
+        {
+            this.pointer = GameObject.Find("Pointer");
+        }
     }
 }

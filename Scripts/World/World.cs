@@ -20,13 +20,8 @@ public static class World
     private static MeshRenderer waterMeshRenderer;
     private static MeshFilter waterMeshFilter;
     
-
     // Tile dictionary
     public static Dictionary<Vector2Int, WorldTile> Tiles = new Dictionary<Vector2Int, WorldTile>();
-
-    // TODO: was going to use these for debugging random value stuff
-    public static float backgroundNoiseAverageValue = 0f;
-    public static float backgroundTileAmount = 0f;
 
     // Tile types
     public enum HeightmapTileTypeEnum
@@ -146,7 +141,6 @@ public static class World
         CreateTiles();
         AssignTilesToMesh();
         Lifeforms.ResetAllLife();
-        Lifeforms.SpawnLifeforms();
         Debug.Log($@"New World Generated!");
     }
 
@@ -228,8 +222,8 @@ public static class World
     // Assigns tiles to tilemaps using tile dictionary
     private static void AssignTilesToMesh()
     {
-        terrainObject.GetComponent<MeshFilter>().mesh = MeshBuilder.CreateMesh(Tiles, MeshBuilder.MeshTypeEnum.Terrain);
-        waterObject.GetComponent<MeshFilter>().mesh = MeshBuilder.CreateMesh(Tiles, MeshBuilder.MeshTypeEnum.Water);
+        terrainObject.GetComponent<MeshFilter>().mesh = MeshBuilder.CreateMesh(MeshBuilder.MeshTypeEnum.Terrain);
+        waterObject.GetComponent<MeshFilter>().mesh = MeshBuilder.CreateMesh(MeshBuilder.MeshTypeEnum.Water);
     }
 
     // Clears the tile dictionary and all tilemaps
@@ -317,5 +311,12 @@ public static class World
         int x = -gm.baseSettings.worldSize + (_quadIndex % (gm.baseSettings.worldSize * 2));
         int y = -gm.baseSettings.worldSize + Mathf.FloorToInt(_quadIndex / (gm.baseSettings.worldSize * 2));
         return new Vector2Int(x, y);
+    }
+
+    // Get tile position from world position
+    public static WorldTile GetTileFromWorldPos(Vector3 _worldPos)
+    {
+        Vector2Int tilePos = new Vector2Int(Mathf.FloorToInt(_worldPos.x), Mathf.FloorToInt(_worldPos.z));
+        return Tiles[tilePos];
     }
 }

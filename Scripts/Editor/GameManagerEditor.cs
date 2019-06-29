@@ -28,9 +28,13 @@ public class GameManagerEditor : Editor
                 this.gm.GenerateNewWorld();
             }
         }
-        if(GUILayout.Button("Randomize Seeds"))
+        if(GUILayout.Button("Randomize Seeds/Regenerate World"))
         {
             this.gm.RandomizeSeeds();
+        }
+        if(GUILayout.Button("Reset/Spawn New Lifeforms"))
+        {
+            this.gm.SpawnLifeforms();
         }
         this.DrawSettingsEditor(this.gm.baseSettings, this.gm.GenerateNewWorld, ref this.gm.baseSettingsFoldout, ref this.baseSettingsEditor);
         this.DrawSettingsEditor(this.gm.heightmapNoiseSettings, this.gm.GenerateNewWorld, ref this.gm.heightmapNoiseSettingsFoldout, ref this.heightmapNoiseSettingsEditor);

@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+
+using UnityEngine;
 
 // World tiles
 public class WorldTile
@@ -10,6 +12,10 @@ public class WorldTile
     public float humidity;
     public World.HeightmapTileTypeEnum heightmapTileType;
     public World.SedimentTileTypeEnum sedimentTileType;
+
+    // Tile occupants
+    public Plant plant;
+    public List<Animal> animals;
 
     // World tile constructor
     public WorldTile(Vector2Int _position, float _height, float _temperature, float _humidity, World.HeightmapTileTypeEnum _backgroundTileType, World.SedimentTileTypeEnum _foregroundTileType)
