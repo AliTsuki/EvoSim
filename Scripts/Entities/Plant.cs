@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+
+using UnityEngine;
 
 // Defines and controls plants
 public class Plant : Entity
@@ -11,6 +13,7 @@ public class Plant : Entity
     public float currentSedimentThrive;
     public World.HeightmapTileTypeEnum bestHeightmapThrive;
     public float currentHeightmapThrive;
+    public float thrivingAmount = 0.0f;
 
     // World spawn plant constructor
     public Plant(int _id, WorldTile _tile)
@@ -21,6 +24,7 @@ public class Plant : Entity
         this.currentTile.plant = this;
         this.isMature = true;
         this.geneTypes = plantGeneTypes;
+        this.percentMature = 1.0f;
         this.RandomizeGenes();
         this.SetupGameObject();
         this.InitializeStats();
@@ -30,7 +34,7 @@ public class Plant : Entity
     }
 
     // Parent spawn plant constructor
-    public Plant(int _id, WorldTile _tile, Plant _parentOne, Plant _parentTwo)
+    public Plant(int _id, WorldTile _tile, Dictionary<string, float> _parentOneGenes, Dictionary<string, float> _parentTwoGenes)
     {
         this.id = _id;
         this.type = TypeEnum.Plant;
@@ -38,7 +42,7 @@ public class Plant : Entity
         this.currentTile.plant = this;
         this.isMature = false;
         this.geneTypes = plantGeneTypes;
-        this.GetGenesFromParents(_parentOne, _parentTwo);
+        this.GetGenesFromParents(_parentOneGenes, _parentTwoGenes);
         this.SetupGameObject();
         this.InitializeStats();
         this.CheckBestThriveType();
@@ -51,6 +55,7 @@ public class Plant : Entity
     public void SetupGameObject()
     {
         this.gameObject = GameObject.Instantiate(Resources.Load<GameObject>("Entities/Entity"), new Vector3(this.currentTile.position.x + 0.5f, 0.2f, this.currentTile.position.y + 0.5f), Quaternion.Euler(90, 0, 0), Lifeforms.plantParentObject.transform);
+        this.gameObject.name = $@"Plant: {this.id}";
         this.gameObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Shader Graphs/Entity Shader"));
     }
 
@@ -60,7 +65,7 @@ public class Plant : Entity
         
         if(this.energy < 0f)
         {
-            this.ModifyHealth(-this.energy);
+            this.ModifyHealth(this.energy);
             this.energy = 0f;
         }
         else if(this.energy > this.maxEnergy)
@@ -74,6 +79,7 @@ public class Plant : Entity
     private void ThriveCheck()
     {
         string gene = "";
+        float energyModification = 0f;
         // Sediment types
         if(this.currentTile.sedimentTileType == World.SedimentTileTypeEnum.Stone)
         {
@@ -104,7 +110,7 @@ public class Plant : Entity
             gene = geneThriveClay;
         }
         this.currentSedimentThrive = this.genes[gene];
-        this.ModifyEnergy(this.genes[gene] - 0.49f);
+        energyModification = this.genes[gene] - 0.49999f;
         // Heightmap types
         if(this.currentTile.heightmapTileType == World.HeightmapTileTypeEnum.Highland)
         {
@@ -123,7 +129,9 @@ public class Plant : Entity
             gene = geneThriveOcean;
         }
         this.currentHeightmapThrive = this.genes[gene];
-        this.ModifyEnergy(this.genes[gene] - 0.49f);
+        energyModification += this.genes[gene] - 0.49999f;
+        this.thrivingAmount = energyModification;
+        this.ModifyEnergy(energyModification);
     }
 
     // Recheck thrive
@@ -213,9 +221,17 @@ public class Plant : Entity
     // Update reproduction
     public override void UpdateReproduction()
     {
-        if(this.energy >= this.genes[geneEnergyCostReproduction] * energyScale)
+        if(this.isMature == true && this.isReproductionOnCooldown == false && this.isCarryingSpawn == false && this.energy >= this.genes[geneEnergyCostReproduction] * energyScale)
         {
             this.CheckForMate();
+        }
+        else if(this.isCarryingSpawn == true && Time.time - ((this.genes[geneGestationTime] * gestationTimeScale) + this.lastSeededTime) > 0f)
+        {
+            this.SpawnSapling();
+        }
+        else if(this.isReproductionOnCooldown == true && Time.time - ((this.genes[geneReproductionCooldownTime] * reproductionCooldownTimeScale) + this.lastBirthedTime) > 0f)
+        {
+            this.isReproductionOnCooldown = false;
         }
     }
 
@@ -229,10 +245,10 @@ public class Plant : Entity
                 Vector2Int position = new Vector2Int(x, y);
                 if(World.IsPositionValid(position) == true)
                 {
-                    Plant checkingPlant = World.Tiles[new Vector2Int(x, y)].plant;
-                    if(this.CalculateGeneticSimilarityToTarget(this, checkingPlant) > this.genes[geneMinimumSimilarityReproduction])
+                    Plant targetPlant = World.Tiles[new Vector2Int(x, y)].plant;
+                    if(targetPlant != null && this.CalculateGeneticSimilarityToTarget(this, targetPlant) > this.genes[geneMinimumSimilarityReproduction])
                     {
-                        this.Mate(checkingPlant);
+                        this.Mate(targetPlant);
                     }
                 }
             }
@@ -242,18 +258,30 @@ public class Plant : Entity
     // Mate
     public void Mate(Plant _mate)
     {
+        this.matesGenes = _mate.genes;
+        this.isCarryingSpawn = true;
+        this.isReproductionOnCooldown = true;
+        this.lastSeededTime = Time.time;
+    }
+
+    // Spawn sapling
+    public void SpawnSapling()
+    {
         int x = GameController.random.Next(this.currentTile.position.x - Mathf.RoundToInt(this.genes[geneSeedingDistance] * distanceScale), this.currentTile.position.x + Mathf.RoundToInt(this.genes[geneSeedingDistance] * distanceScale));
         int y = GameController.random.Next(this.currentTile.position.y - Mathf.RoundToInt(this.genes[geneSeedingDistance] * distanceScale), this.currentTile.position.y + Mathf.RoundToInt(this.genes[geneSeedingDistance] * distanceScale));
         Vector2Int seedingLocation = new Vector2Int(x, y);
-        if(World.IsPositionValid(seedingLocation))
+        if(World.IsPositionValid(seedingLocation) == true)
         {
             WorldTile seedingTile = World.Tiles[seedingLocation];
             if(seedingTile.plant == null)
             {
-                Plant newPlant = new Plant(Lifeforms.plantID, seedingTile, this, _mate);
+                Plant newPlant = new Plant(Lifeforms.plantID, seedingTile, this.genes, this.matesGenes);
                 Lifeforms.SpawnParentedLifeform(newPlant);
             }
         }
         this.ModifyEnergy(-this.genes[geneEnergyCostReproduction] * energyScale);
+        this.isCarryingSpawn = false;
+        this.isReproductionOnCooldown = true;
+        this.lastBirthedTime = Time.time;
     }
 }

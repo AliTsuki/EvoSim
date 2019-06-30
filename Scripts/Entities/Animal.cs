@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+
+using UnityEngine;
 
 // Defines and controls animals
 public class Animal : Entity
@@ -12,6 +14,7 @@ public class Animal : Entity
         this.currentTile.animals.Add(this.id, this);
         this.isMature = true;
         this.geneTypes = animalGeneTypes;
+        this.percentMature = 1.0f;
         this.RandomizeGenes();
         this.InitializeStats();
         this.gameObject = GameObject.Instantiate(Resources.Load<GameObject>("/Entities/Entity"), new Vector3(_tile.position.x + 0.5f, 0.2f, _tile.position.y + 0.5f), Quaternion.identity, Lifeforms.plantParentObject.transform);
@@ -19,7 +22,7 @@ public class Animal : Entity
     }
 
     // Parent spawn plant constructor
-    public Animal(int _id, WorldTile _tile, Animal _parentOne, Animal _parentTwo)
+    public Animal(int _id, WorldTile _tile, Dictionary<string, float> _parentOneGenes, Dictionary<string, float> _parentTwoGenes)
     {
         this.id = _id;
         this.type = TypeEnum.Animal;
@@ -27,7 +30,7 @@ public class Animal : Entity
         this.currentTile.animals.Add(this.id, this);
         this.isMature = false;
         this.geneTypes = animalGeneTypes;
-        this.GetGenesFromParents(_parentOne, _parentTwo);
+        this.GetGenesFromParents(_parentOneGenes, _parentTwoGenes);
         this.InitializeStats();
         this.gameObject = GameObject.Instantiate(Resources.Load<GameObject>("/Entities/Entity"), new Vector3(_tile.position.x + 0.5f, 0.2f, _tile.position.y + 0.5f), Quaternion.identity, Lifeforms.plantParentObject.transform);
         this.Start();

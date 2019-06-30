@@ -16,6 +16,9 @@ public static class Lifeforms
     // Entity lists
     public static Dictionary<int, Plant> plants = new Dictionary<int, Plant>();
     public static Dictionary<int, Animal> animals = new Dictionary<int, Animal>();
+    // Addition lists
+    public static Dictionary<int, Plant> plantsToAdd = new Dictionary<int, Plant>();
+    public static Dictionary<int, Animal> animalsToAdd = new Dictionary<int, Animal>();
     // Removal lists
     public static List<int> plantsToRemove = new List<int>();
     public static List<int> animalsToRemove = new List<int>();
@@ -36,6 +39,7 @@ public static class Lifeforms
     public static void Update()
     {
         CleanupLifeformsDictionaries();
+        AddNewLifeforms();
         UpdateLifeforms();
     }
 
@@ -43,6 +47,7 @@ public static class Lifeforms
     public static void FixedUpdate()
     {
         CleanupLifeformsDictionaries();
+        AddNewLifeforms();
         FixedUpdateLifeforms();
     }
 
@@ -102,14 +107,29 @@ public static class Lifeforms
     {
         if(_entity.type == Entity.TypeEnum.Plant)
         {
-            plants.Add(plantID, _entity as Plant);
+            plantsToAdd.Add(plantID, _entity as Plant);
             plantID++;
         }
         else if(_entity.type == Entity.TypeEnum.Animal)
         {
-            animals.Add(animalID, _entity as Animal);
+            animalsToAdd.Add(animalID, _entity as Animal);
             animalID++;
         }
+    }
+
+    // Add new lifeforms
+    public static void AddNewLifeforms()
+    {
+        foreach(KeyValuePair<int, Plant> plant in plantsToAdd)
+        {
+            plants.Add(plant.Key, plant.Value);
+        }
+        plantsToAdd.Clear();
+        foreach(KeyValuePair<int, Animal> animal in animalsToAdd)
+        {
+            animals.Add(animal.Key, animal.Value);
+        }
+        animalsToAdd.Clear();
     }
 
     // Update all lifeforms

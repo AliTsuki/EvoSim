@@ -1,8 +1,10 @@
-﻿// Controls the state of the game
+﻿using UnityEngine;
+
+// Controls the state of the game
 public static class GameController
 {
     // Version
-    private static readonly string version = "0.0.2d";
+    private static readonly string version = "0.0.2e";
 
     // GameManager reference
     private static readonly GameManager gm = GameManager.instance;

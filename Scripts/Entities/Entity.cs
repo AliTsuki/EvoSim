@@ -7,19 +7,24 @@ using UnityEngine;
 public abstract class Entity
 {
     // Constants
-    // Rates
+    // Probability Rates
     public const float mutationChanceRate = 0.016f; // 1 percent per second maximum mutation chance
     public const float maxHealingRate = 0.016f; // 1 percent per second health healing maximum
     public const float maxRotRate = 0.016f; // 1 health per second rot speed maximum
-    // Scales
+    // Health and Energy values
     public const float healthScale = 100f; // 100 is highest health value
     public const float energyScale = 100f; // 100 is highest energy value
-    public const float sizeScale = 2f; // 200% is largest scale of entities
-    public const float smallestSizeScale = 0.2f; // 20% is smallest scale of entities
-    public const float maturityScale = 120f; // 2 minutes is longest age to maturity
-    public const float ageScale = 600f; // 10 minutes is longest age before death
-    public const float distanceScale = 10f; // 10 tiles distance maximum
-    
+    // Size scales
+    public const float sizeScale = 1.5f; // 150% is largest scale of entities
+    public const float smallestSizeScale = 0.1f; // 10% is smallest scale of entities
+    // Distance scales
+    public const float distanceScale = 20f; // 20 tiles distance maximum
+    // Time scales
+    public const float maturityScale = 90f; // 1.5 minutes is longest age to maturity
+    public const float ageScale = 300f; // 5 minutes is longest age before death
+    public const float gestationTimeScale = 90f; // 1.5 minutes is longest gestation time
+    public const float reproductionCooldownTimeScale = 90f; // 1.5 minutes is longest time between births
+
 
     // Unity objects
     public GameObject gameObject;
@@ -38,6 +43,8 @@ public abstract class Entity
     public static string geneRotSpeed = "Rot_Speed";
     public static string geneEnergyCostReproduction = "Energy_Cost_Reproduction";
     public static string geneMinimumSimilarityReproduction = "Minimum_Similarity_Reproduction";
+    public static string geneReproductionCooldownTime = "Reproduction_Cooldown_Time";
+    public static string geneGestationTime = "Gestation_Time";
     #endregion
     #region plant gene values
     public static string genePollinatingDistance = "Pollinating_Distance";
@@ -60,9 +67,10 @@ public abstract class Entity
     #endregion
     // Genes
     public Dictionary<string, float> genes = new Dictionary<string, float>();
+    public Dictionary<string, float> matesGenes = new Dictionary<string, float>();
     public string[] geneTypes;
-    public static string[] plantGeneTypes = new string[] { geneMutationChance, geneHealthMax, geneHealingRate, geneEnergyMax, geneSizeMax, geneAgeMature, geneAgeMax, geneRotSpeed, geneEnergyCostReproduction, geneMinimumSimilarityReproduction, genePollinatingDistance, geneSeedingDistance, geneThriveStone, geneThriveCobble, geneThriveGravel, geneThriveDirt, geneThriveSand, geneThriveSilt, geneThriveClay, geneThriveHighland, geneThriveLowland, geneThriveShallows, geneThriveOcean };
-    public static string[] animalGeneTypes = new string[] { geneMutationChance, geneHealthMax, geneHealingRate, geneEnergyMax, geneSizeMax, geneAgeMature, geneAgeMax, geneRotSpeed, geneEnergyCostReproduction, geneMinimumSimilarityReproduction };
+    public static string[] plantGeneTypes = new string[] { geneMutationChance, geneHealthMax, geneHealingRate, geneEnergyMax, geneSizeMax, geneAgeMature, geneAgeMax, geneRotSpeed, geneEnergyCostReproduction, geneMinimumSimilarityReproduction, geneReproductionCooldownTime, geneGestationTime, genePollinatingDistance, geneSeedingDistance, geneThriveStone, geneThriveCobble, geneThriveGravel, geneThriveDirt, geneThriveSand, geneThriveSilt, geneThriveClay, geneThriveHighland, geneThriveLowland, geneThriveShallows, geneThriveOcean };
+    public static string[] animalGeneTypes = new string[] { geneMutationChance, geneHealthMax, geneHealingRate, geneEnergyMax, geneSizeMax, geneAgeMature, geneAgeMax, geneRotSpeed, geneEnergyCostReproduction, geneMinimumSimilarityReproduction, geneReproductionCooldownTime, geneGestationTime };
 
     // ID
     public int id;
@@ -72,9 +80,13 @@ public abstract class Entity
         Animal
     }
     public TypeEnum type;
-    // Age
-    public float birthMoment;
+    // Age times
+    public float birthTime;
+    public float lastSeededTime;
+    public float lastBirthedTime;
+    // Age percents
     public float percentOfMaxAge;
+    public float percentMature;
     // Health
     public float health;
     public float maxHealth;
@@ -87,6 +99,8 @@ public abstract class Entity
     // Bools
     public bool isAlive;
     public bool isMature;
+    public bool isCarryingSpawn;
+    public bool isReproductionOnCooldown;
     
 
     // Start is called before the first frame update
@@ -186,17 +200,17 @@ public abstract class Entity
     {
         foreach(string geneType in this.geneTypes)
         {
-            this.genes.Add(geneType, (float)GameController.random.NextDouble() + 0.0001f);
+            this.genes.Add(geneType, Mathematics.GetCauchyDistributedRandomNumber());
         }
     }
 
     // Gets random genes from two parents
-    public void GetGenesFromParents(Entity _parentOne, Entity _parentTwo)
+    public void GetGenesFromParents(Dictionary<string, float> _parentOneGenes, Dictionary<string, float> _parentTwoGenes)
     {
-        foreach(KeyValuePair<string, float> gene in _parentOne.genes)
+        foreach(KeyValuePair<string, float> gene in _parentOneGenes)
         {
             int random = GameController.random.Next(0, 2);
-            float geneValue = (random == 0) ? _parentOne.genes[gene.Key] : _parentTwo.genes[gene.Key];
+            float geneValue = (random == 0) ? _parentOneGenes[gene.Key] : _parentTwoGenes[gene.Key];
             this.genes.Add(gene.Key, geneValue);
         }
     }
@@ -205,21 +219,21 @@ public abstract class Entity
     public void Mutate()
     {
         string geneType = this.genes.ElementAt(GameController.random.Next(0, this.genes.Count)).Key;
-        this.genes[geneType] = (float)GameController.random.NextDouble() + 0.0001f;
+        this.genes[geneType] = Mathematics.GetCauchyDistributedRandomNumber();
         this.RecheckThrive();
     }
 
     // Recheck genes
     public virtual void RecheckThrive()
     {
-
+        // Each type has their own method
     }
 
     // Initializes stat values
     public void InitializeStats()
     {
         this.isAlive = true;
-        this.birthMoment = Time.time;
+        this.birthTime = Time.time;
         this.maxHealth = this.genes[geneHealthMax] * healthScale;
         this.health = this.maxHealth;
         this.maxEnergy = this.genes[geneEnergyMax] * energyScale;
@@ -244,7 +258,7 @@ public abstract class Entity
         int index = 0;
         foreach(KeyValuePair<string, float> gene in _currentEntity.genes)
         {
-            similarityPercents[index] = Mathematics.GetPointOnNormalDistribution(_currentEntity.genes[gene.Key], _targetedEntity.genes[gene.Key]);
+            similarityPercents[index] = Mathematics.GetHeightAtPointOnNormalDistribution(_currentEntity.genes[gene.Key], _targetedEntity.genes[gene.Key]);
             averageSimilarity += similarityPercents[index];
             index++;
         }
@@ -263,12 +277,12 @@ public abstract class Entity
             this.Die(); // :(
         }
         // If alive and health is less than max and energy is greater than half max, heal
-        else if(this.isAlive == true && this.health < this.maxHealth && this.energy > this.maxEnergy * 0.5f)
+        else if(this.isAlive == true && this.health < this.maxHealth && this.energy >= this.maxEnergy * 0.5f)
         {
             this.Heal();
         }
         // If dead, rot
-        else if(this.isAlive == false)
+        else if(this.isAlive == false && this.health > 0f)
         {
             this.Rot();
         }
@@ -287,7 +301,16 @@ public abstract class Entity
     // Update age
     public void UpdateAge()
     {
-        this.percentOfMaxAge = Time.time / this.genes[geneAgeMax] * ageScale;
+        this.percentOfMaxAge = Time.time / ((this.genes[geneAgeMax] * ageScale) + this.birthTime);
+        if(this.isMature == false)
+        {
+            this.percentMature = Time.time / ((this.genes[geneAgeMature] * maturityScale) + this.birthTime);
+            if(this.percentMature >= 1.0f)
+            {
+                this.percentMature = 1.0f;
+                this.isMature = true;
+            }
+        }
     }
 
     // Update mutation
@@ -304,7 +327,7 @@ public abstract class Entity
     // Update energy
     public virtual void UpdateEnergy()
     {
-
+        // Each type has their own method
     }
 
     // Update scale of entity
@@ -312,8 +335,7 @@ public abstract class Entity
     {
         if(this.isMature == false)
         {
-            float percentMature = Time.time / ((this.genes[geneAgeMature] * maturityScale) + this.birthMoment);
-            if(percentMature >= 1.0f)
+            if(this.percentMature >= 1.0f)
             {
                 this.isMature = true;
                 float size = this.genes[geneSizeMax] * sizeScale;
@@ -321,7 +343,7 @@ public abstract class Entity
             }
             else
             {
-                float size = Mathf.Clamp(this.genes[geneSizeMax] * sizeScale * percentMature, smallestSizeScale, sizeScale);
+                float size = Mathf.Clamp(this.genes[geneSizeMax] * sizeScale * this.percentMature, smallestSizeScale, sizeScale);
                 this.gameObject.transform.localScale = new Vector3(size, size, size);
             }
         }
@@ -330,7 +352,7 @@ public abstract class Entity
     // Update reproduction
     public virtual void UpdateReproduction()
     {
-
+        // Each type has their own method
     }
     #endregion
 }
