@@ -15,7 +15,7 @@ public class WorldTile
 
     // Tile occupants
     public Plant plant;
-    public List<Animal> animals;
+    public Dictionary<int, Animal> animals;
 
     // World tile constructor
     public WorldTile(Vector2Int _position, float _height, float _temperature, float _humidity, World.HeightmapTileTypeEnum _backgroundTileType, World.SedimentTileTypeEnum _foregroundTileType)

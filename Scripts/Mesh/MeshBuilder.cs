@@ -6,6 +6,11 @@ public static class MeshBuilder
     // GameManager reference
     private static readonly GameManager gm = GameManager.instance;
 
+    // Constants
+    private const int numVertsPerQuad = 4;
+    private const int numTriIndicesPerQuad = 6;
+
+    // Mesh types
     public enum MeshTypeEnum
     {
         Terrain,
@@ -19,8 +24,6 @@ public static class MeshBuilder
         int worldSize = gm.baseSettings.worldSize;
         int numRows = worldSize * 2;
         int numQuadsPerRow = numRows;
-        const int numVertsPerQuad = 4;
-        const int numTriIndicesPerQuad = 6;
         int numVertsTotal = numRows * numVertsPerQuad * numQuadsPerRow;
         int numTriIndicesTotal = numVertsTotal * 3 / 2;
         // Assign limits to arrays
@@ -122,8 +125,7 @@ public static class MeshBuilder
         mesh.uv = uvs;
         mesh.triangles = tris;
         mesh.RecalculateBounds();
-        mesh.RecalculateNormals();
-        mesh.RecalculateTangents();
+        mesh.Optimize();
         // Return mesh
         return mesh;
     }

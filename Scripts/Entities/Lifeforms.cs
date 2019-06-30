@@ -16,6 +16,9 @@ public static class Lifeforms
     // Entity lists
     public static Dictionary<int, Plant> plants = new Dictionary<int, Plant>();
     public static Dictionary<int, Animal> animals = new Dictionary<int, Animal>();
+    // Removal lists
+    public static List<int> plantsToRemove = new List<int>();
+    public static List<int> animalsToRemove = new List<int>();
 
     // IDs
     public static int plantID = 0;
@@ -32,13 +35,32 @@ public static class Lifeforms
     // Update is called once per frame
     public static void Update()
     {
+        CleanupLifeformsDictionaries();
         UpdateLifeforms();
     }
 
     // FixedUpdate is called a fixed number of times a second
     public static void FixedUpdate()
     {
+        CleanupLifeformsDictionaries();
         FixedUpdateLifeforms();
+    }
+
+    // Clean up lifeforms dictionaries
+    public static void CleanupLifeformsDictionaries()
+    {
+        // Clean up plant dictionary
+        foreach(int plantID in plantsToRemove)
+        {
+            plants.Remove(plantID);
+        }
+        plantsToRemove.Clear();
+        // Clean up animal dictionary
+        foreach(int animalID in animalsToRemove)
+        {
+            animals.Remove(animalID);
+        }
+        animalsToRemove.Clear();
     }
 
     // Resets all creatures
@@ -72,6 +94,21 @@ public static class Lifeforms
         if(animals.Count == 0)
         {
             // TODO: Add animals
+        }
+    }
+
+    // Spawn parented lifeform
+    public static void SpawnParentedLifeform(Entity _entity)
+    {
+        if(_entity.type == Entity.TypeEnum.Plant)
+        {
+            plants.Add(plantID, _entity as Plant);
+            plantID++;
+        }
+        else if(_entity.type == Entity.TypeEnum.Animal)
+        {
+            animals.Add(animalID, _entity as Animal);
+            animalID++;
         }
     }
 

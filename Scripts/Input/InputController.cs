@@ -16,14 +16,16 @@ public static class InputController
     // Update is called once per frame
     public static void Update()
     {
-
+        GetInput();
+        CameraController.UpdateCameraZoom(zoom);
+        CameraController.GetMousePositionInWorld();
     }
 
     // FixedUpdate is called a fixed number of times a second
     public static void FixedUpdate()
     {
         GetInput();
-        CameraController.UpdateCameraPosition(aim, zoom);
+        CameraController.UpdateCameraPosition(aim);
     }
 
     // Get inputs from keyboard/mouse

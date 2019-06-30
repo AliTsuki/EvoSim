@@ -2,7 +2,7 @@
 public static class GameController
 {
     // Version
-    private static readonly string version = "0.0.2c";
+    private static readonly string version = "0.0.2d";
 
     // GameManager reference
     private static readonly GameManager gm = GameManager.instance;
@@ -15,6 +15,7 @@ public static class GameController
     public static void Start()
     {
         CameraController.SetupCamera();
+        UIController.Start();
         InputController.Start();
         World.Start();
         Lifeforms.Start();
@@ -23,6 +24,7 @@ public static class GameController
     // Update is called once per frame
     public static void Update()
     {
+        UIController.Update();
         InputController.Update();
         World.Update();
         Lifeforms.Update();
@@ -31,6 +33,7 @@ public static class GameController
     // FixedUpdate is called a fixed number of times a second
     public static void FixedUpdate()
     {
+        UIController.FixedUpdate();
         InputController.FixedUpdate();
         World.FixedUpdate();
         Lifeforms.FixedUpdate();

@@ -317,6 +317,26 @@ public static class World
     public static WorldTile GetTileFromWorldPos(Vector3 _worldPos)
     {
         Vector2Int tilePos = new Vector2Int(Mathf.FloorToInt(_worldPos.x), Mathf.FloorToInt(_worldPos.z));
-        return Tiles[tilePos];
+        if(IsPositionValid(tilePos) == true)
+        {
+            return Tiles[tilePos];
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    // Checks if position is valid
+    public static bool IsPositionValid(Vector2Int _position)
+    {
+        if(_position.x < gm.baseSettings.worldSize && _position.x >= -gm.baseSettings.worldSize && _position.y < gm.baseSettings.worldSize && _position.y >= -gm.baseSettings.worldSize)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

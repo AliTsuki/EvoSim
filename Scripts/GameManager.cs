@@ -6,10 +6,6 @@ public class GameManager : MonoBehaviour
     // Singleton
     public static GameManager instance;
 
-    // Entity
-    // TODO: replace this, figure out a better way to access prefab
-    public GameObject entity;
-
     // Settings
     public BaseSettings baseSettings;
     public NoiseSettings heightmapNoiseSettings;
