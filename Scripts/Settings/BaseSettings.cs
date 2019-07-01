@@ -7,8 +7,8 @@ public class BaseSettings : ScriptableObject
     public bool updateInEditor = true;
     [Range(1, 60)]
     public int worldSize = 60;
-    [Range(0, 256)]
-    public int maxAnimalCount = 50;
     [Range(0, 512)]
-    public int maxPlantCount = 400;
+    public int maxAnimalCount = 100;
+    [Range(0, 1024)]
+    public int maxPlantCount = 1024;
 }

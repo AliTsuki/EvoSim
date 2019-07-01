@@ -36,6 +36,10 @@ public class GameManagerEditor : Editor
         {
             this.gm.SpawnLifeforms();
         }
+        if(GUILayout.Button("Write Log to File"))
+        {
+            this.gm.WriteLogToFile();
+        }
         this.DrawSettingsEditor(this.gm.baseSettings, this.gm.GenerateNewWorld, ref this.gm.baseSettingsFoldout, ref this.baseSettingsEditor);
         this.DrawSettingsEditor(this.gm.heightmapNoiseSettings, this.gm.GenerateNewWorld, ref this.gm.heightmapNoiseSettingsFoldout, ref this.heightmapNoiseSettingsEditor);
         this.DrawSettingsEditor(this.gm.temperatureNoiseSettings, this.gm.GenerateNewWorld, ref this.gm.temperatureNoiseSettingsFoldout, ref this.temperatureNoiseSettingsEditor);

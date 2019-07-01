@@ -40,6 +40,7 @@ public class GameManager : MonoBehaviour
     {
         instance = this;
         GameController.Start();
+        this.StartCoroutine(Logger.UpdateLog());
     }
 
     // Update is called once per frame
@@ -71,5 +72,11 @@ public class GameManager : MonoBehaviour
     {
         Lifeforms.ResetAllLife();
         Lifeforms.SpawnLifeforms();
+    }
+
+    // Write log to file
+    public void WriteLogToFile()
+    {
+        Logger.WriteLogToFile();
     }
 }

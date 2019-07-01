@@ -8,22 +8,22 @@ public abstract class Entity
 {
     // Constants
     // Probability Rates
-    public const float mutationChanceRate = 0.016f; // 1 percent per second maximum mutation chance
-    public const float maxHealingRate = 0.016f; // 1 percent per second health healing maximum
-    public const float maxRotRate = 0.016f; // 1 health per second rot speed maximum
+    public const float mutationChanceRate = 0.0016f; // 0.1 percent per second maximum mutation chance
+    public const float maxHealingRate = 0.016f; // 1 percent health per second healing maximum
+    public const float maxRotRate = 0.16f; // 10 percent health per second rot speed maximum
     // Health and Energy values
-    public const float healthScale = 100f; // 100 is highest health value
-    public const float energyScale = 100f; // 100 is highest energy value
+    public const float healthScale = 200f; // 200 is highest health value
+    public const float energyScale = 100f; // 200 is highest energy value
     // Size scales
     public const float sizeScale = 1.5f; // 150% is largest scale of entities
-    public const float smallestSizeScale = 0.1f; // 10% is smallest scale of entities
+    public const float smallestSizeScale = 0.05f; // 5% is smallest scale of entities
     // Distance scales
-    public const float distanceScale = 20f; // 20 tiles distance maximum
+    public const float distanceScale = 15f; // 15 tiles distance maximum
     // Time scales
-    public const float maturityScale = 90f; // 1.5 minutes is longest age to maturity
+    public const float maturityScale = 60f; // 1 minutes is longest age to maturity
     public const float ageScale = 300f; // 5 minutes is longest age before death
-    public const float gestationTimeScale = 90f; // 1.5 minutes is longest gestation time
-    public const float reproductionCooldownTimeScale = 90f; // 1.5 minutes is longest time between births
+    public const float gestationTimeScale = 60f; // 1 minutes is longest gestation time
+    public const float reproductionCooldownTimeScale = 60f; // 1 minutes is longest time between births
 
 
     // Unity objects
@@ -81,26 +81,30 @@ public abstract class Entity
     }
     public TypeEnum type;
     // Age times
-    public float birthTime;
-    public float lastSeededTime;
-    public float lastBirthedTime;
+    public float birthTime = 0.0f;
+    public float lastSeededTime = 0.0f;
+    public float lastBirthedTime = 0.0f;
     // Age percents
-    public float percentOfMaxAge;
-    public float percentMature;
+    public float percentOfMaxAge = 0.0f;
+    public float percentMature = 0.0f;
     // Health
-    public float health;
-    public float maxHealth;
+    public float health = 100f;
+    public float maxHealth = 100f;
     // Energy
-    public float energy;
-    public float maxEnergy;
+    public float energy = 100f;
+    public float maxEnergy = 100f;
     // AI
-    public Entity target;
-    public WorldTile currentTile;
+    public Entity target = null;
+    public WorldTile currentTile = null;
     // Bools
-    public bool isAlive;
-    public bool isMature;
-    public bool isCarryingSpawn;
-    public bool isReproductionOnCooldown;
+    public bool isAlive = false;
+    public bool isMature = false;
+    public bool isCarryingSpawn = false;
+    public bool isReproductionOnCooldown = false;
+    // Mutation
+    public int numberOfMutations = 0;
+    // Reproduction
+    public int mateID = 0;
     
 
     // Start is called before the first frame update
@@ -221,6 +225,7 @@ public abstract class Entity
         string geneType = this.genes.ElementAt(GameController.random.Next(0, this.genes.Count)).Key;
         this.genes[geneType] = Mathematics.GetCauchyDistributedRandomNumber();
         this.RecheckThrive();
+        this.numberOfMutations++;
     }
 
     // Recheck genes
@@ -301,13 +306,12 @@ public abstract class Entity
     // Update age
     public void UpdateAge()
     {
-        this.percentOfMaxAge = Time.time / ((this.genes[geneAgeMax] * ageScale) + this.birthTime);
+        this.percentOfMaxAge = Mathf.Clamp01(Time.time / ((this.genes[geneAgeMax] * ageScale) + this.birthTime));
         if(this.isMature == false)
         {
-            this.percentMature = Time.time / ((this.genes[geneAgeMature] * maturityScale) + this.birthTime);
+            this.percentMature = Mathf.Clamp01(Time.time / ((this.genes[geneAgeMature] * maturityScale) + this.birthTime));
             if(this.percentMature >= 1.0f)
             {
-                this.percentMature = 1.0f;
                 this.isMature = true;
             }
         }

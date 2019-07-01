@@ -14,6 +14,13 @@ public class Plant : Entity
     public World.HeightmapTileTypeEnum bestHeightmapThrive;
     public float currentHeightmapThrive;
     public float thrivingAmount = 0.0f;
+    public enum MateTypeEnum
+    {
+        Self,
+        Other
+    }
+    public MateTypeEnum mateType;
+
 
     // World spawn plant constructor
     public Plant(int _id, WorldTile _tile)
@@ -246,19 +253,25 @@ public class Plant : Entity
                 if(World.IsPositionValid(position) == true)
                 {
                     Plant targetPlant = World.Tiles[new Vector2Int(x, y)].plant;
-                    if(targetPlant != null && this.CalculateGeneticSimilarityToTarget(this, targetPlant) > this.genes[geneMinimumSimilarityReproduction])
+                    if(targetPlant != null && targetPlant.isAlive == true && this.CalculateGeneticSimilarityToTarget(this, targetPlant) > this.genes[geneMinimumSimilarityReproduction])
                     {
                         this.Mate(targetPlant);
+                        this.mateType = MateTypeEnum.Other;
+                        return;
                     }
                 }
             }
         }
+        // Self pollinate if no mate nearby
+        this.Mate(this);
+        this.mateType = MateTypeEnum.Self;
     }
 
     // Mate
     public void Mate(Plant _mate)
     {
         this.matesGenes = _mate.genes;
+        this.mateID = _mate.id;
         this.isCarryingSpawn = true;
         this.isReproductionOnCooldown = true;
         this.lastSeededTime = Time.time;

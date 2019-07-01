@@ -27,6 +27,9 @@ public static class Lifeforms
     public static int plantID = 0;
     public static int animalID = 0;
 
+    // Time
+    public static float timeLastRespawnedLifeforms = 0f;
+
 
     // Start is called before the first frame update
     public static void Start()
@@ -87,6 +90,7 @@ public static class Lifeforms
     public static void SpawnLifeforms()
     {
         // TODO: Add similar plants next to each other instead of totally random
+        timeLastRespawnedLifeforms = Time.time;
         while(plants.Count < gm.baseSettings.maxPlantCount)
         {
             WorldTile randomTile = World.Tiles[new Vector2Int(GameController.random.Next(-gm.baseSettings.worldSize, gm.baseSettings.worldSize), GameController.random.Next(-gm.baseSettings.worldSize, gm.baseSettings.worldSize))];
