@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73e983255c5e67d4e94bc7dfb8ffe4c5, type: 3}
+  m_Name: Tile Settings
+  m_EditorClassIdentifier: 
+  stoneTile: {fileID: 11400000, guid: 45dedb195cc14e44e98b592b5939a926, type: 2}
+  cobbleTile: {fileID: 11400000, guid: e6e27fba5e0b29e408b748b662e539a8, type: 2}
+  gravelTile: {fileID: 11400000, guid: 2bc7fbb84c0fd2f42b9cd32a11628b42, type: 2}
+  dirtTile: {fileID: 11400000, guid: be7e324ed95ecc64c8411609d06967af, type: 2}
+  sandTile: {fileID: 11400000, guid: 92acae64ca552a04c9799bdfcc8f3cc1, type: 2}
+  siltTile: {fileID: 11400000, guid: 5eb7195b7723ad343b16259524603c4e, type: 2}
+  clayTile: {fileID: 11400000, guid: 248c11badfcbaaa4b921813625055b3f, type: 2}
+  shallowsTile: {fileID: 11400000, guid: b14ab65ec9b0b9c48a2776b89ad232e2, type: 2}
+  oceanTile: {fileID: 11400000, guid: 151c6337c00fa5d48bf818d331f4ca31, type: 2}
+  tilemaps:
+  - {fileID: 0}
+  - {fileID: 0}
